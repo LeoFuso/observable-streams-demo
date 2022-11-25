@@ -6,23 +6,27 @@ and it is intended as a learning tool and reference guide.
 
 # Data flow
 
+
 ```mermaid
         graph TB
         s1[approved-statement-lines] --> s2[statement-lines-classifier]
 		s2 --> s3[receipt-apportionment]
-		s2 --> s4[accouting-apportionment]
-		s3 --> s5[summarization-engine]
-		s4 --> s5
-		s5 --> s6[bank-statements]
-		s6 --> s7[revenue]
-		s8[order-apportionment] --> s6
+		s2 --> s4[accouting-summarization]
+		s3 --> s5[revenue-summarization]
+		s4 --> s6[bank-statements]
+		s5 --> s7[revenue]
+		s8[order-apportionment] --> s5
 		
 ```
 
-#### Summarization Engine
+#### Accounting Summarization
 
-Summarizes all Statement Lines weekly, storing it in a circular queue per Account ID holding data
+Summarizes all Apportionment Lines weekly, storing it in a circular queue per Account ID holding data
 up to six months old.
+
+Statement Lines uniqueness is guaranteed using a Bloom Filter — responsible for carrying statistic data
+from the last two months.
+
 
 #### Receipt Apportionment
 
@@ -42,24 +46,27 @@ From:
 
 To:
 
-| Order | Account | Amount    |    Date    |
-|:------|:-------:|-----------|:----------:|
-| 89    |    2    | $ 05.0000 | 2022-11-25 |
-| 115   |    2    | $ 05.0000 | 2022-11-26 |
-| 701   |    2    | $ 05.0000 | 2022-11-26 |
-| 65    |    2    | $ 06.5650 | 2022-11-27 |
-| 15    |    7    | $ 04.6750 | 2022-11-27 |
-| 18    |  2, 7   | $ 58.7000 | 2022-11-27 |
+| Order | Account | Amount    | Statement Lines |    Date    |
+|:------|:-------:|-----------|----------------:|:----------:|
+| 89    |    2    | $ 05.0000 |              12 | 2022-11-25 |
+| 115   |    2    | $ 05.0000 |              12 | 2022-11-26 |
+| 701   |    2    | $ 05.0000 |              12 | 2022-11-26 |
+| 65    |    2    | $ 06.5650 |          13, 19 | 2022-11-27 |
+| 15    |    2    | $ 04.6750 |              13 | 2022-11-27 |
+| 18    |    2    | $ 19.3500 |              25 | 2022-11-27 |
+| 18    |    7    | $ 39.3500 |             102 | 2022-11-27 |
 
 
 
-#### Accounting Apportionment
+#### Revenue Summarization
 
-Group all Statements of the current Week, 
+It Summarizes all costs related to an Order in the ten-minute window, by grouping
+together the receipt cost with all previous order-related costs.
+
 
 #### Bank Statements
 
-Holds reference for all Statement Lines for the current week. 
+Holds reference for all Statement Lines for the current week, along with the resulting balance.
 
 
 # Getting Started
