@@ -1,0 +1,37 @@
+avro {
+    createSetters = true
+    createOptionalGetters = false
+    gettersReturnOptional = false
+    optionalGettersForNullableFieldsOnly = true
+    fieldVisibility = "PRIVATE"
+    outputCharacterEncoding = "UTF-8"
+    stringType = "String"
+    templateDirectory = null
+    enableDecimalLogicalType = true
+}
+
+
+schemaRegistry {
+
+    url = findProperty('schema.registry.url')
+    quiet = false
+
+    if (project.hasProperty('schema.registry.password')) {
+        credentials {
+            username = findProperty('schema.registry.username')
+            password = findProperty('schema.registry.password')
+        }
+    }
+
+    register {
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/demo.accepted-statement-line.avsc', 'AVRO')
+    }
+
+    compatibility {
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/demo.accepted-statement-line.avsc', 'AVRO')
+    }
+
+    config {
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'BACKWARD_TRANSITIVE')
+    }
+}

@@ -1,0 +1,132 @@
+{
+    "doc": "A Statement Line encapsulates a financial transaction.",
+    "type": "record",
+    "namespace": "io.github.leofuso.obs.demo.events",
+    "name": "StatementLine",
+    "fields": [
+        {
+            "doc": "UUID v5 compliant identification for the transaction. Used as the primary key — composed with the source field contents.",
+            "name": "transaction",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "name": "source",
+            "type": {
+                "name": "Source",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "namespace",
+                        "type": {
+                            "type": "string",
+                            "logicalType": "uuid"
+                        }
+                    },
+                    {
+                        "name": "domain",
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "account",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "name": "details",
+            "type": {
+                "name": "Details",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "operator",
+                        "type": {
+                            "type": "string",
+                            "logicalType": "uuid"
+                        }
+                    },
+                    {
+                        "doc": "An arbitrary string of data related to this transaction.",
+                        "name": "annotation",
+                        "type": "string"
+                    },
+                    {
+                        "doc": "Autiable party responsible for this transaction.",
+                        "name": "segment",
+                        "type": {
+                            "type": "enum",
+                            "name": "Segment",
+                            "symbols": [
+                                "ROUTE",
+                                "ALLOWANCE",
+                                "INCENTIVE",
+                                "TIP",
+                                "DEDUCTION",
+                                "MVP",
+                                "SHIFT",
+                                "CORRECTION",
+                                "RETENTION",
+                                "ROUTE_COMPLEMENT",
+                                "UNCOMPLETE_ROUTE",
+                                "UNKNOWN"
+                            ],
+                            "default": "UNKNOWN"
+                        },
+                        "default": "UNKNOWN"
+                    }
+                ]
+            }
+        },
+        {
+            "doc": "A short explaination behind this transaction.",
+            "name": "category",
+            "type": {
+                "type": "enum",
+                "name": "Category",
+                "symbols": [
+                    "CREDIT",
+                    "DEPOSIT",
+                    "CHARGE",
+                    "WITHDRAWAL",
+                    "DEDUCTION",
+                    "UNKNOWN"
+                ],
+                "default": "UNKNOWN"
+            },
+            "default": "UNKNOWN"
+        },
+        {
+            "doc": "The amount transferred in the refered transaction. Can be zero.",
+            "name": "amount",
+            "type": "bytes",
+            "logicalType": "decimal",
+            "precision": 4,
+            "scale": 2
+        },
+        {
+            "doc": "Competence timestamp of the refered transaction. Always behind the System timestamp.",
+            "name": "competence",
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-micros"
+            },
+            "default": 0
+        },
+        {
+            "name": "baggage",
+            "type": {
+                "type": "map",
+                "values": "string",
+                "default": {}
+            },
+            "default": {}
+        }
+    ]
+}

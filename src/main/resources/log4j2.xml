@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" shutdownHook="enabled" shutdownTimeout="5000" verbose="true">
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <JsonTemplateLayout charset="UTF-8"
+                                locationInfoEnabled="false"
+                                stackTraceEnabled="true"
+                                recyclerFactory="queue"
+                                eventTemplateUri="classpath:log4j-layout.json">
+
+                <EventTemplateAdditionalField key="java_version" value="${java:version}"/>
+
+            </JsonTemplateLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <AsyncRoot level="INFO" additivity="false">
+            <AppenderRef ref="CONSOLE"/>
+        </AsyncRoot>
+    </Loggers>
+</Configuration>

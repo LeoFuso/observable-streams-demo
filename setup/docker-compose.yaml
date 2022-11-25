@@ -1,0 +1,170 @@
+version: '3'
+
+services:
+
+    zoo:
+        image: zookeeper:3.4.9
+        restart: unless-stopped
+        hostname: zoo
+        ports:
+            - '2181:2181'
+        environment:
+            ZOO_MY_ID: '1'
+            ZOO_PORT: '2181'
+            ZOO_SERVERS: 'server.1=zoo:2888:3888'
+
+    kafka:
+        image: confluentinc/cp-kafka:6.2.2
+        hostname: kafka
+        ports:
+            - '9092:9092'
+        environment:
+            KAFKA_ADVERTISED_LISTENERS: 'LISTENER_DOCKER_INTERNAL://kafka:19092, LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092'
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT'
+            KAFKA_INTER_BROKER_LISTENER_NAME: 'LISTENER_DOCKER_INTERNAL'
+            KAFKA_ZOOKEEPER_CONNECT: 'zoo:2181'
+            KAFKA_BROKER_ID: '1'
+            KAFKA_LOG4J_LOGGERS: 'kafka.controller=INFO, kafka.producer.async.DefaultEventHandler=INFO, state.change.logger=INFO'
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: '1'
+        depends_on:
+            - zoo
+
+    kafka-schema-registry:
+        image: confluentinc/cp-schema-registry:6.2.2
+        hostname: kafka-schema-registry
+        ports:
+            - '9081:9081'
+        environment:
+            SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:19092'
+            SCHEMA_REGISTRY_HOST_NAME: 'kafka-schema-registry'
+            SCHEMA_REGISTRY_LISTENERS: 'http://0.0.0.0:9081'
+            SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: 'GET,POST,PUT,OPTIONS'
+            SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+        depends_on:
+            - zoo
+            - kafka
+
+    console:
+        image: docker.redpanda.com/vectorized/console:latest
+        restart: on-failure
+        entrypoint: /bin/sh
+        command: -c "echo \"$$CONSOLE_CONFIG_FILE\" > /tmp/config.yml; /app/console"
+        environment:
+            CONFIG_FILEPATH: /tmp/config.yml
+            CONSOLE_CONFIG_FILE: |
+                kafka:
+                  brokers: 
+                    - 'kafka:19092'
+                  schemaRegistry:
+                    enabled: true
+                    urls: 
+                    - 'http://kafka-schema-registry:9081'
+                redpanda:
+                  adminApi:
+                    enabled: false
+                    urls: 
+                    - 'http://redpanda:9644'
+                connect:
+                  enabled: false
+                  clusters:
+                    - name: local-connect-cluster
+                      url: http://connect:8083
+        ports:
+            - '9090:8080'
+        depends_on:
+            - kafka
+            - kafka-schema-registry
+
+    zipkin-slim:
+        image: openzipkin/zipkin-slim
+        ports:
+            - '9411:9411'
+
+    kafka-schema-registry-ui:
+        profiles:
+            - full
+        image: landoop/schema-registry-ui:latest
+        hostname: kafka-schema-registry-ui
+        ports:
+            - '8005:8000'
+        environment:
+            SCHEMAREGISTRY_URL: 'http://localhost:9081'
+        depends_on:
+            - zoo
+            - kafka
+            - kafka-schema-registry
+
+    kafka-rest-proxy:
+        profiles:
+            - full
+        image: confluentinc/cp-kafka-rest:6.2.2
+        hostname: kafka-rest-proxy
+        ports:
+            - '9082:9082'
+        environment:
+            KAFKA_REST_LISTENERS: 'http://0.0.0.0:9082/'
+            KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://kafka-schema-registry:9081/'
+            KAFKA_REST_HOST_NAME: 'kafka-rest-proxy'
+            KAFKA_REST_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:19092'
+        depends_on:
+            - zoo
+            - kafka
+            - kafka-schema-registry
+
+    kafka-connect:
+        profiles:
+            - full
+        image: confluentinc/cp-kafka-connect:6.2.2
+        hostname: kafka-connect
+        ports:
+            - "9083:9083"
+        environment:
+            CONNECT_BOOTSTRAP_SERVERS: 'kafka:19092'
+            CONNECT_REST_PORT: '9083'
+            CONNECT_GROUP_ID: 'compose-connect-group'
+            CONNECT_CONFIG_STORAGE_TOPIC: 'docker-connect-configs'
+            CONNECT_OFFSET_STORAGE_TOPIC: 'docker-connect-offsets'
+            CONNECT_STATUS_STORAGE_TOPIC: 'docker-connect-status'
+            CONNECT_KEY_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
+            CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: 'http://kafka-schema-registry:9081'
+            CONNECT_VALUE_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
+            CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://kafka-schema-registry:9081'
+            CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+            CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+            CONNECT_REST_ADVERTISED_HOST_NAME: 'kafka-connect'
+            CONNECT_LOG4J_ROOT_LOGLEVEL: 'INFO'
+            CONNECT_LOG4J_LOGGERS: 'org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR'
+            CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: '1'
+            CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: '1'
+            CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: '1'
+            CONNECT_PLUGIN_PATH: '/usr/share/java,/etc/kafka-connect/jars'
+        depends_on:
+            - zoo
+            - kafka
+            - kafka-schema-registry
+            - kafka-rest-proxy
+
+    ksqldb-server:
+        profiles:
+            - full
+        image: confluentinc/cp-ksqldb-server:5.5.1
+        hostname: ksqldb-server
+        ports:
+            - '8088:8088'
+        environment:
+            KSQL_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:19092'
+            KSQL_LISTENERS: 'http://0.0.0.0:8088/'
+            KSQL_KSQL_SERVICE_ID: 'ksqldb-server_'
+        depends_on:
+            - zoo
+            - kafka
+
+    zoonavigator:
+        profiles:
+            - full
+        image: elkozmon/zoonavigator:0.8.0
+        ports:
+            - '8004:8000'
+        environment:
+            HTTP_PORT: '8000'
+            AUTO_CONNECT_CONNECTION_STRING: 'zoo:2181'
