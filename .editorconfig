@@ -313,7 +313,7 @@ ij_java_visibility = public
 ij_java_while_brace_force = never
 ij_java_while_on_new_line = false
 ij_java_wrap_comments = true
-ij_java_wrap_first_method_in_call_chain = true
+ij_java_wrap_first_method_in_call_chain = false
 ij_java_wrap_long_lines = true
 
 [*.less]

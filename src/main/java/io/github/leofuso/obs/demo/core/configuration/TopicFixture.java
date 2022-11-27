@@ -17,7 +17,9 @@ public class TopicFixture {
     /**
      * The topic holder of all approved {@link io.github.leofuso.obs.demo.events.StatementLine Statement Line} events.
      */
-    public static final String APPROVED_STATEMENT_LINE = "demo.approved-statement-lines";
+    public static final String APPROVED_STATEMENT_LINE = "obs.approved-statement-lines";
+
+    public static final String RECEIPT_APPORTIONMENT_ROUTE_BRANCHED_LINE = "obs.approved-statement-lines";
 
     /**
      * All Kafka's Topics work with the same quantity of partitions. The five-partition amount was chosen arbitrarily.
@@ -33,7 +35,18 @@ public class TopicFixture {
 
         return new KafkaAdmin.NewTopics(
                 TopicBuilder
-                        .name("demo.accepted-statement-line")
+                        .name(APPROVED_STATEMENT_LINE)
+                        .partitions(PARTITIONS_COUNT)
+                        .configs(
+                                /* @formatter:off */
+                                Map.of(
+                                        "retention.ms", oneHour + ""
+                                )
+                                /* @formatter:on */
+                        )
+                        .build(),
+                TopicBuilder
+                        .name(APPROVED_STATEMENT_LINE)
                         .partitions(PARTITIONS_COUNT)
                         .configs(
                                 /* @formatter:off */
