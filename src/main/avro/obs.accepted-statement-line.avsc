@@ -105,10 +105,12 @@
         {
             "doc": "The amount transferred in the refered transaction. Can be zero.",
             "name": "amount",
-            "type": "bytes",
-            "logicalType": "decimal",
-            "precision": 4,
-            "scale": 2
+            "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+            }
         },
         {
             "doc": "Competence timestamp of the refered transaction. Always behind the System timestamp.",

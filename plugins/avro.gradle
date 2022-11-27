@@ -24,14 +24,17 @@ schemaRegistry {
     }
 
     register {
-        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/demo.accepted-statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.accepted-statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'src/main/avro/obs.receipt-apportionment-line.avsc', 'AVRO')
     }
 
     compatibility {
-        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/demo.accepted-statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.accepted-statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'src/main/avro/obs.receipt-apportionment-line.avsc', 'AVRO')
     }
 
     config {
         subject('io.github.leofuso.obs.demo.events.StatementLine', 'BACKWARD_TRANSITIVE')
+        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'BACKWARD_TRANSITIVE')
     }
 }

@@ -1,10 +1,10 @@
 package io.github.leofuso.obs.demo.domain.router;
 
-import io.github.leofuso.obs.demo.events.StatementLine;
+import java.util.UUID;
 
 import org.apache.kafka.streams.kstream.Predicate;
 
-import java.util.UUID;
+import io.github.leofuso.obs.demo.events.StatementLine;
 
 public class AccoutingSummarizationRouter implements StatementLineRouter {
 

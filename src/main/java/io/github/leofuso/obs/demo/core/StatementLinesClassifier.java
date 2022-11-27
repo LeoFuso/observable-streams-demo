@@ -36,11 +36,11 @@ public class StatementLinesClassifier {
         final Named nullFilter = Named.as(ROOT_NAMING + "-null-filter");
         final Named splitter = Named.as(ROOT_NAMING + "-splitter");
         return streamsBuilder.stream(source, consumer)
-                             .filter((key, value) -> Objects.nonNull(key) || Objects.nonNull(value), nullFilter)
-                             .split(splitter)
-                             .branch(unknownSegmentRouter.supports(), unknownSegmentRouter.branched())
-                             .branch(accountingSummarizationRouter.supports(), accountingSummarizationRouter.branched())
-                             .branch(receiptApportionmentRouter.supports(), receiptApportionmentRouter.branched())
-                             .defaultBranch(unknownSegmentRouter.branched());
+                .filter((key, value) -> Objects.nonNull(key) || Objects.nonNull(value), nullFilter)
+                .split(splitter)
+                .branch(unknownSegmentRouter.supports(), unknownSegmentRouter.branched())
+                .branch(accountingSummarizationRouter.supports(), accountingSummarizationRouter.branched())
+                .branch(receiptApportionmentRouter.supports(), receiptApportionmentRouter.branched())
+                .defaultBranch(unknownSegmentRouter.branched());
     }
 }

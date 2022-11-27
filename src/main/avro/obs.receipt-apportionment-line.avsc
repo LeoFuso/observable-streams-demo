@@ -1,0 +1,86 @@
+{
+    "doc": "A Receipt Apportionment Line encapsulates a single line of the Receipt.",
+    "type": "record",
+    "namespace": "io.github.leofuso.obs.demo.events",
+    "name": "ReceiptApportionmentLine",
+    "fields": [
+        {
+            "doc": "UUID v4 compliant identification for the Order.",
+            "name": "order",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "doc": "The calculated amount associated with the Order. Can be zero.",
+            "name": "amount",
+            "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 4,
+                "scale": 2
+            }
+        },
+        {
+            "doc": "An expanded view of all StatementLines associated with the Order.",
+            "name": "composite",
+            "type": {
+                "type": "map",
+                "values": {
+                    "doc": "A Component has all data related to the StatementLine breakdown, containing the original amount, the resolved share-amount and its ratio.",
+                    "type": "record",
+                    "name": "Component",
+                    "fields": [
+                        {
+                            "doc": "The Original StatementLine containing a cost associated with the Order.",
+                            "name": "source",
+                            "type": "io.github.leofuso.obs.demo.events.StatementLine"
+                        },
+                        {
+                            "doc": "The resolved share-amount of the Order-StatementLine pair. Can be zero.",
+                            "name": "share",
+                            "type": {
+                                "type": "bytes",
+                                "logicalType": "decimal",
+                                "precision": 4,
+                                "scale": 2
+                            }
+                        },
+                        {
+                            "doc": "The ratio of the Order-StatementLine pair.",
+                            "name": "ratio",
+                            "type": {
+                                "type": "record",
+                                "name": "Ratio",
+                                "fields": [
+                                    {
+                                        "doc": "The denominator part. Never zero.",
+                                        "name": "denominator",
+                                        "type": "int"
+                                    },
+                                    {
+                                        "doc": "The numerator part. Never zero.",
+                                        "name": "numerator",
+                                        "type": "int"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "default": {}
+            },
+            "default": {}
+        },
+        {
+            "name": "baggage",
+            "type": {
+                "type": "map",
+                "values": "string",
+                "default": {}
+            },
+            "default": {}
+        }
+    ]
+}

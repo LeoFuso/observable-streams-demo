@@ -1,6 +1,6 @@
 package io.github.leofuso.obs.demo.core;
 
-import io.github.leofuso.obs.demo.domain.router.*;
+import java.util.Objects;
 
 import org.apache.kafka.streams.StreamsBuilder;
 import org.slf4j.Logger;
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Objects;
+import io.github.leofuso.obs.demo.domain.router.*;
 
 @Configuration
 public class AccountingSummarization {

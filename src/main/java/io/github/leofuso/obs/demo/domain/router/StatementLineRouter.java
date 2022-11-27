@@ -1,17 +1,16 @@
 package io.github.leofuso.obs.demo.domain.router;
 
-import com.google.common.base.CaseFormat;
-
-import io.github.leofuso.obs.demo.events.StatementLine;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CaseFormat;
 
-import java.util.UUID;
-import java.util.function.Consumer;
+import io.github.leofuso.obs.demo.events.StatementLine;
 
 public interface StatementLineRouter {
 

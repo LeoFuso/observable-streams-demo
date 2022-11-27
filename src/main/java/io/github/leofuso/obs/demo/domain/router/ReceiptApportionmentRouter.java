@@ -1,19 +1,19 @@
 package io.github.leofuso.obs.demo.domain.router;
 
-import io.github.leofuso.obs.demo.events.*;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.kafka.streams.kstream.Predicate;
 
-import java.util.Set;
-import java.util.UUID;
+import io.github.leofuso.obs.demo.events.*;
 
 public class ReceiptApportionmentRouter implements StatementLineRouter {
 
     private static final Set<Segment> SUPPORTED = Set.of(
-        Segment.ROUTE,
-        Segment.INCENTIVE,
-        Segment.SHIFT,
-        Segment.MVP
+            Segment.ROUTE,
+            Segment.INCENTIVE,
+            Segment.SHIFT,
+            Segment.MVP
     );
 
     @Override

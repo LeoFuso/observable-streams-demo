@@ -1,13 +1,13 @@
 package io.github.leofuso.obs.demo.domain.router;
 
-import io.github.leofuso.obs.demo.events.*;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.apache.kafka.streams.kstream.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
-import java.util.function.Consumer;
+import io.github.leofuso.obs.demo.events.*;
 
 public class UnknownSegmentRouter implements StatementLineRouter {
 
@@ -34,15 +34,16 @@ public class UnknownSegmentRouter implements StatementLineRouter {
 
         final Consumer<KStream<UUID, StatementLine>> kStreamConsumer =
                 kStream -> kStream.peek(
-                        (key, value) -> {
-                            final String message =
-                                    """
-                                            Skipping apportionment [ {} ]: Unknown route.
-                                            """;
-                            logger.warn(message, key);
-                        },
-                        Named.as(skipping)
-                ).to(topic(), produced);
+                                (key, value) -> {
+                                    final String message =
+                                            """
+                                                    Skipping apportionment [ {} ]: Unknown route.
+                                                    """;
+                                    logger.warn(message, key);
+                                },
+                                Named.as(skipping)
+                        )
+                        .to(topic(), produced);
 
         final String branchedName = "-" + StatementLineRouter.namedRouter(this) + "-branch";
         return Branched.withConsumer(kStreamConsumer, branchedName);
