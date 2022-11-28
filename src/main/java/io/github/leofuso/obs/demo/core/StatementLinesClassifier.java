@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.github.leofuso.obs.demo.core.configuration.TopicFixture;
-import io.github.leofuso.obs.demo.domain.router.StatementLineRouter;
+import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
 import io.github.leofuso.obs.demo.events.StatementLine;
 
 @Configuration
@@ -18,7 +18,7 @@ public class StatementLinesClassifier {
 
     private static final Logger logger = LoggerFactory.getLogger(StatementLinesClassifier.class);
 
-    private static final String ROOT_NAMING = "statementline";
+    private static final String NAMED_SUFFIX = "stln";
 
     private final StreamsBuilder streamsBuilder;
 
@@ -27,20 +27,26 @@ public class StatementLinesClassifier {
     }
 
     @Bean
-    public Map<String, KStream<UUID, StatementLine>> classifier(StatementLineRouter receiptApportionmentRouter,
-                                                                StatementLineRouter accountingSummarizationRouter,
-                                                                StatementLineRouter unknownSegmentRouter) {
+    public Map<String, KStream<UUID, StatementLine>> classifier(StatementLineBranch statementLineApportionmentBranch,
+                                                                StatementLineBranch treasureHouseAccountingBranch,
+                                                                StatementLineBranch unknownDepartmentBranch) {
 
-        final String source = TopicFixture.APPROVED_STATEMENT_LINE;
-        final Consumed<UUID, StatementLine> consumer = Consumed.as(ROOT_NAMING + "-consumer");
-        final Named nullFilter = Named.as(ROOT_NAMING + "-null-filter");
-        final Named splitter = Named.as(ROOT_NAMING + "-splitter");
-        return streamsBuilder.stream(source, consumer)
-                .filter((key, value) -> Objects.nonNull(key) || Objects.nonNull(value), nullFilter)
-                .split(splitter)
-                .branch(unknownSegmentRouter.supports(), unknownSegmentRouter.branched())
-                .branch(accountingSummarizationRouter.supports(), accountingSummarizationRouter.branched())
-                .branch(receiptApportionmentRouter.supports(), receiptApportionmentRouter.branched())
-                .defaultBranch(unknownSegmentRouter.branched());
+        final String topic = TopicFixture.APPROVED_STATEMENT_LINE;
+        final Consumed<UUID, StatementLine> consumed = Consumed.as(NAMED_SUFFIX + "-consumed");
+        final Named namedFilter = Named.as(NAMED_SUFFIX + "-filter");
+        final Named namedBrancher = Named.as(NAMED_SUFFIX + "-brancher");
+        return streamsBuilder.stream(topic, consumed)
+                .filter((key, value) -> Objects.nonNull(key) || Objects.nonNull(value), namedFilter)
+                .peek((key, value) -> {
+                    final String message = """
+                            Processing StatementLine [ {} ].
+                            """;
+                    logger.info(message, key);
+                })
+                .split(namedBrancher)
+                .branch(unknownDepartmentBranch.supports(), unknownDepartmentBranch.branched())
+                .branch(treasureHouseAccountingBranch.supports(), treasureHouseAccountingBranch.branched())
+                .branch(statementLineApportionmentBranch.supports(), statementLineApportionmentBranch.branched())
+                .defaultBranch(unknownDepartmentBranch.branched());
     }
 }

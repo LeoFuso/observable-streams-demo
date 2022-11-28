@@ -1,4 +1,4 @@
-package io.github.leofuso.obs.demo.domain.router;
+package io.github.leofuso.obs.demo.domain.branch;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -12,17 +12,17 @@ import com.google.common.base.CaseFormat;
 
 import io.github.leofuso.obs.demo.events.StatementLine;
 
-public interface StatementLineRouter {
+public interface StatementLineBranch {
 
-    Logger logger = LoggerFactory.getLogger(StatementLineRouter.class);
+    Logger logger = LoggerFactory.getLogger(StatementLineBranch.class);
 
-    static <S extends StatementLineRouter> S produce(Class<S> routerClass) {
+    static <S extends StatementLineBranch> S produce(Class<S> routerClass) {
         return Utils.newInstance(routerClass);
     }
 
-    static String namedRouter(StatementLineRouter router) {
-        final Class<? extends StatementLineRouter> routerClass = router.getClass();
-        final String className = routerClass.getSimpleName();
+    static String namedRouter(StatementLineBranch branch) {
+        final Class<? extends StatementLineBranch> branchClass = branch.getClass();
+        final String className = branchClass.getSimpleName();
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, className);
     }
 
@@ -32,14 +32,14 @@ public interface StatementLineRouter {
             return kStream;
         }
 
-        final String peeker = name() + "-peeker";
+        final Named namedTrace = Named.as(name() + "-trace");
         return kStream.peek((key, value) -> {
             final String message =
                     """
-                            Routing StatementLine [ {} ].
+                            Branching StatementLine [ {} ] to [ {} ].
                             """;
-            logger.trace(message, key);
-        }, Named.as(peeker));
+            logger.trace(message, key, topic());
+        }, namedTrace);
     }
 
     default Predicate<UUID, StatementLine> supports() {
@@ -48,17 +48,15 @@ public interface StatementLineRouter {
 
     default Branched<UUID, StatementLine> branched() {
         final String topic = topic();
-
-        final String processorName = name() + "-producer";
-        final Produced<UUID, StatementLine> produced = Produced.as(processorName);
-        final Consumer<KStream<UUID, StatementLine>> kStreamConsumer = kStream -> trace(kStream).to(topic, produced);
+        final Produced<UUID, StatementLine> produced = Produced.as(name() + "-produced");
+        final Consumer<KStream<UUID, StatementLine>> kStreams = kStream -> trace(kStream).to(topic, produced);
 
         final String branchedName = "-" + namedRouter(this) + "-branch";
-        return Branched.withConsumer(kStreamConsumer, branchedName);
+        return Branched.withConsumer(kStreams, branchedName);
     }
 
     default String topic() {
-        return "obs.internal-" + name();
+        return "obs." + name();
     }
 
     default String name() {

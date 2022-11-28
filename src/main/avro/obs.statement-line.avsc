@@ -5,7 +5,7 @@
     "name": "StatementLine",
     "fields": [
         {
-            "doc": "UUID v5 compliant identification for the transaction. Used as the primary key — composed with the source field contents.",
+            "doc": "UUID v5 compliant identification for the transaction. Used as the primary key — composed with the source field constituints.",
             "name": "transaction",
             "type": {
                 "type": "string",
@@ -13,6 +13,7 @@
             }
         },
         {
+            "doc": "Every transaction has its uniqueness guaranteed by its source, being the auditable entity responsible for posting the transaction.",
             "name": "source",
             "type": {
                 "name": "Source",
@@ -33,6 +34,7 @@
             }
         },
         {
+            "doc": "UUID v4 compliant identification for the Account owning the transaction.",
             "name": "account",
             "type": {
                 "type": "string",
@@ -46,35 +48,25 @@
                 "type": "record",
                 "fields": [
                     {
-                        "name": "operator",
-                        "type": {
-                            "type": "string",
-                            "logicalType": "uuid"
-                        }
-                    },
-                    {
                         "doc": "An arbitrary string of data related to this transaction.",
                         "name": "annotation",
                         "type": "string"
                     },
                     {
                         "doc": "Autiable party responsible for this transaction.",
-                        "name": "segment",
+                        "name": "department",
                         "type": {
                             "type": "enum",
-                            "name": "Segment",
+                            "name": "Department",
                             "symbols": [
                                 "ROUTE",
-                                "ALLOWANCE",
                                 "INCENTIVE",
-                                "TIP",
-                                "DEDUCTION",
-                                "MVP",
+                                "ALLOWANCE",
                                 "SHIFT",
+                                "DEDUCTION",
+                                "DEPOSIT",
+                                "WITHDRAWAL",
                                 "CORRECTION",
-                                "RETENTION",
-                                "ROUTE_COMPLEMENT",
-                                "UNCOMPLETE_ROUTE",
                                 "UNKNOWN"
                             ],
                             "default": "UNKNOWN"
@@ -85,25 +77,19 @@
             }
         },
         {
-            "doc": "A short explaination behind this transaction.",
-            "name": "category",
+            "doc": "The operation behind this transaction.",
+            "name": "operation",
             "type": {
                 "type": "enum",
-                "name": "Category",
+                "name": "Operation",
                 "symbols": [
                     "CREDIT",
-                    "DEPOSIT",
-                    "CHARGE",
-                    "WITHDRAWAL",
-                    "DEDUCTION",
-                    "UNKNOWN"
-                ],
-                "default": "UNKNOWN"
-            },
-            "default": "UNKNOWN"
+                    "DEBIT"
+                ]
+            }
         },
         {
-            "doc": "The amount transferred in the refered transaction. Can be zero.",
+            "doc": "The amount transferred in the refered transaction. It can be zero or negative.",
             "name": "amount",
             "type": {
                 "type": "bytes",
@@ -122,6 +108,7 @@
             "default": 0
         },
         {
+            "doc": "A bagagge is a context-senstive Key-Value carrier of business-unrelated data.",
             "name": "baggage",
             "type": {
                 "type": "map",

@@ -1,11 +1,11 @@
 {
-    "doc": "A Receipt Apportionment Line encapsulates a single line of the Receipt.",
+    "doc": "A Receipt encapsulates all relevant data associated with the apportionment of an Order.",
     "type": "record",
     "namespace": "io.github.leofuso.obs.demo.events",
-    "name": "ReceiptApportionmentLine",
+    "name": "Receipt",
     "fields": [
         {
-            "doc": "UUID v4 compliant identification for the Order.",
+            "doc": "UUID v4 compliant identification for an Order.",
             "name": "order",
             "type": {
                 "type": "string",
@@ -13,8 +13,8 @@
             }
         },
         {
-            "doc": "The calculated amount associated with the Order. Can be zero.",
-            "name": "amount",
+            "doc": "Found deficit after performing all Statement Line apportioning associated with an Order. It can be zero but never negative.",
+            "name": "deficit",
             "type": {
                 "type": "bytes",
                 "logicalType": "decimal",
@@ -23,22 +23,22 @@
             }
         },
         {
-            "doc": "An expanded view of all StatementLines associated with the Order.",
-            "name": "composite",
+            "doc": "An expanded view of all Receipt Lines associated with an Order apportionment.",
+            "name": "lines",
             "type": {
                 "type": "map",
                 "values": {
-                    "doc": "A Component has all data related to the StatementLine breakdown, containing the original amount, the resolved share-amount and its ratio.",
+                    "doc": "A Receipt Line is a traceable unit of an apportionment process, containing the base amount, the resolved share and its ratio.",
                     "type": "record",
-                    "name": "Component",
+                    "name": "ReceiptLine",
                     "fields": [
                         {
-                            "doc": "The Original StatementLine containing a cost associated with the Order.",
-                            "name": "source",
+                            "doc": "A Statement Line containing the base cost associated with an Order, stripped from its baggage.",
+                            "name": "object",
                             "type": "io.github.leofuso.obs.demo.events.StatementLine"
                         },
                         {
-                            "doc": "The resolved share-amount of the Order-StatementLine pair. Can be zero.",
+                            "doc": "The resolved share of an Order in relation with a Statement Line. It can be zero but never negative.",
                             "name": "share",
                             "type": {
                                 "type": "bytes",
@@ -48,7 +48,7 @@
                             }
                         },
                         {
-                            "doc": "The ratio of the Order-StatementLine pair.",
+                            "doc": "The ratio of the share.",
                             "name": "ratio",
                             "type": {
                                 "type": "record",
@@ -74,6 +74,7 @@
             "default": {}
         },
         {
+            "doc": "A bagagge is a context-senstive Key-Value carrier of business-unrelated data.",
             "name": "baggage",
             "type": {
                 "type": "map",

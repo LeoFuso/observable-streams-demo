@@ -19,7 +19,9 @@ public class TopicFixture {
      */
     public static final String APPROVED_STATEMENT_LINE = "obs.approved-statement-lines";
 
-    public static final String RECEIPT_APPORTIONMENT_ROUTE = "obs.internal-receipt-apportionment-router";
+    public static final String STATEMENT_LINE_APPORTIONMENT_BRANCH = "obs.statement-line-apportionment-branch";
+
+    public static final String TREASURE_HOUSE_ACCOUNTING_BRANCH = "obs.treasure-house-accouting-branch";
 
     /**
      * All Kafka's Topics work with the same quantity of partitions. The five-partition amount was chosen arbitrarily.
@@ -46,7 +48,18 @@ public class TopicFixture {
                         )
                         .build(),
                 TopicBuilder
-                        .name(APPROVED_STATEMENT_LINE)
+                        .name(STATEMENT_LINE_APPORTIONMENT_BRANCH)
+                        .partitions(PARTITIONS_COUNT)
+                        .configs(
+                                /* @formatter:off */
+                                Map.of(
+                                        "retention.ms", oneHour + ""
+                                )
+                                /* @formatter:on */
+                        )
+                        .build(),
+                TopicBuilder
+                        .name(TREASURE_HOUSE_ACCOUNTING_BRANCH)
                         .partitions(PARTITIONS_COUNT)
                         .configs(
                                 /* @formatter:off */

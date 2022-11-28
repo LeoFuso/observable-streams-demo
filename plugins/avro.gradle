@@ -3,9 +3,9 @@ avro {
     createOptionalGetters = false
     gettersReturnOptional = false
     optionalGettersForNullableFieldsOnly = true
-    fieldVisibility = "PRIVATE"
-    outputCharacterEncoding = "UTF-8"
-    stringType = "String"
+    fieldVisibility = 'PRIVATE'
+    outputCharacterEncoding = 'UTF-8'
+    stringType = 'String'
     templateDirectory = null
     enableDecimalLogicalType = true
 }
@@ -24,17 +24,17 @@ schemaRegistry {
     }
 
     register {
-        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.accepted-statement-line.avsc', 'AVRO')
-        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'src/main/avro/obs.receipt-apportionment-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.Receipt', 'src/main/avro/obs.receipt.avsc', 'AVRO')
     }
 
     compatibility {
-        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.accepted-statement-line.avsc', 'AVRO')
-        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'src/main/avro/obs.receipt-apportionment-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.StatementLine', 'src/main/avro/obs.statement-line.avsc', 'AVRO')
+        subject('io.github.leofuso.obs.demo.events.Receipt', 'src/main/avro/obs.receipt.avsc', 'AVRO')
     }
 
     config {
         subject('io.github.leofuso.obs.demo.events.StatementLine', 'BACKWARD_TRANSITIVE')
-        subject('io.github.leofuso.obs.demo.events.ReceiptApportionmentLine', 'BACKWARD_TRANSITIVE')
+        subject('io.github.leofuso.obs.demo.events.Receipt', 'BACKWARD_TRANSITIVE')
     }
 }
