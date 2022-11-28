@@ -8,7 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import io.github.leofuso.obs.demo.domain.branch.*;
+import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
+import io.github.leofuso.obs.demo.domain.branch.TreasureHouseAccoutingBranch;
 
 @Configuration
 public class TreasureHouseAccounting {
@@ -27,12 +28,5 @@ public class TreasureHouseAccounting {
     public TreasureHouseAccoutingBranch treasureHouseAccountingBranch() {
         return StatementLineBranch.produce(TreasureHouseAccoutingBranch.class);
     }
-
-    @Bean
-    public UnknownDepartmentBranch unknownDepartmentBranch() {
-        return StatementLineBranch.produce(UnknownDepartmentBranch.class);
-    }
-
-
 
 }
