@@ -1,15 +1,13 @@
 package io.github.leofuso.obs.demo.domain.apportionment;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.*;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.*;
+import java.util.stream.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import io.github.leofuso.obs.demo.domain.apportionment.baggage.BaggageOrderExtractor;
+import io.github.leofuso.obs.demo.domain.apportionment.baggage.*;
 import io.github.leofuso.obs.demo.events.*;
 
 public class ReceiptFactory {
@@ -19,7 +17,7 @@ public class ReceiptFactory {
     private static ReceiptFactory INSTANCE;
     private final BaggageOrderExtractor baggageSolver;
 
-    public ReceiptFactory() {
+    private ReceiptFactory() {
         baggageSolver = BaggageOrderExtractor.getInstance();
     }
 

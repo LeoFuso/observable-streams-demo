@@ -2,17 +2,15 @@ package io.github.leofuso.obs.demo.core;
 
 import java.util.*;
 
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 
-import io.github.leofuso.obs.demo.core.configuration.TopicFixture;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineReplicaProcessorSupplier;
-import io.github.leofuso.obs.demo.events.StatementLine;
+import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.*;
+import org.slf4j.*;
+
+import io.github.leofuso.obs.demo.core.configuration.*;
+import io.github.leofuso.obs.demo.domain.branch.*;
+import io.github.leofuso.obs.demo.events.*;
 
 @Configuration
 public class StatementLinesClassifier {
@@ -31,7 +29,7 @@ public class StatementLinesClassifier {
     public Map<String, KStream<UUID, StatementLine>> classifier(StatementLineBranch statementLineApportionmentBranch,
                                                                 StatementLineBranch treasureHouseAccountingBranch) {
 
-        final String topic = TopicFixture.APPROVED_STATEMENT_LINE;
+        final String topic = TopicConfiguration.APPROVED_STATEMENT_LINE;
         final Consumed<UUID, StatementLine> consumed = Consumed.as(NAMED_SUFFIX + "-consumed");
         final Named namedFilter = Named.as(NAMED_SUFFIX + "-filter");
         final Named namedBrancher = Named.as(NAMED_SUFFIX + "-brancher");
@@ -52,7 +50,6 @@ public class StatementLinesClassifier {
                 })
                 .processValues(replicateSupplier, namedReplica)
                 .split(namedBrancher)
-                .branch(treasureHouseAccountingBranch.supports(), treasureHouseAccountingBranch.branched())
                 .branch(statementLineApportionmentBranch.supports(), statementLineApportionmentBranch.branched())
                 .defaultBranch(treasureHouseAccountingBranch.branched());
     }

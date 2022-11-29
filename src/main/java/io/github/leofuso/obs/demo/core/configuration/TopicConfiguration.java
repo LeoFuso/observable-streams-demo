@@ -1,18 +1,17 @@
 package io.github.leofuso.obs.demo.core.configuration;
 
-import java.time.Duration;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.context.annotation.*;
+import org.springframework.kafka.config.*;
+import org.springframework.kafka.core.*;
 
 /**
  * A {@link Configuration} helper class for all needed topics in the Application.
  */
 @Configuration
-public class TopicFixture {
+public class TopicConfiguration {
 
     /**
      * The topic holder of all approved {@link io.github.leofuso.obs.demo.events.StatementLine Statement Line} events.

@@ -65,6 +65,7 @@ dependencies {
 	/* Tests */
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'tech.allegro.schema.json2avro:converter:0.2.15'
 }
 
 tasks {

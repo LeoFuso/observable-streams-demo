@@ -2,7 +2,7 @@ package io.github.leofuso.obs.demo.domain.branch;
 
 import java.util.*;
 
-import org.apache.kafka.streams.kstream.Predicate;
+import org.apache.kafka.streams.kstream.*;
 
 import io.github.leofuso.obs.demo.events.*;
 
@@ -17,7 +17,7 @@ public class StatementLineApportionmentBranch implements StatementLineBranch {
 
     private final String cachedName;
 
-    private StatementLineApportionmentBranch() {
+    public StatementLineApportionmentBranch() {
         cachedName = StatementLineBranch.super.name();
     }
 

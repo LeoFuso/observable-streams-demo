@@ -1,11 +1,10 @@
 package io.github.leofuso.obs.demo.domain.branch;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import org.apache.kafka.streams.kstream.Predicate;
+import org.apache.kafka.streams.kstream.*;
 
-import io.github.leofuso.obs.demo.events.StatementLine;
+import io.github.leofuso.obs.demo.events.*;
 
 import static io.github.leofuso.obs.demo.domain.branch.StatementLineReplicaProcessorSupplier.REPLICA_ID_KEY;
 
@@ -13,7 +12,7 @@ public class TreasureHouseAccoutingBranch implements StatementLineBranch {
 
     private final String cachedName;
 
-    private TreasureHouseAccoutingBranch() {
+    public TreasureHouseAccoutingBranch() {
         cachedName = StatementLineBranch.super.name();
     }
 
