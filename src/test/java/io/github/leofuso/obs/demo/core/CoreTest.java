@@ -29,6 +29,9 @@ import tech.allegro.schema.json2avro.converter.*;
         properties =
                 {
                         "spring.main.banner-mode=off",
+                        "logging.level.root=info",
+                        "logging.level.io.github.leofuso=trace",
+                        "logging.config=classpath:log4j2-test.xml",
 
                         "spring.kafka.properties.schema.registry.url=mock://obs.demo",
                         "spring.kafka.properties.auto.register.schemas=true",

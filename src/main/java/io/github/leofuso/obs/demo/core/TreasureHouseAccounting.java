@@ -1,15 +1,13 @@
 package io.github.leofuso.obs.demo.core;
 
-import java.util.Objects;
+import java.util.*;
 
-import org.apache.kafka.streams.StreamsBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 
-import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
-import io.github.leofuso.obs.demo.domain.branch.TreasureHouseAccoutingBranch;
+import org.apache.kafka.streams.*;
+import org.slf4j.*;
+
+import io.github.leofuso.obs.demo.domain.branch.*;
 
 @Configuration
 public class TreasureHouseAccounting {
@@ -21,7 +19,7 @@ public class TreasureHouseAccounting {
     private final StreamsBuilder streamsBuilder;
 
     public TreasureHouseAccounting(final StreamsBuilder streamsBuilder) {
-        this.streamsBuilder = Objects.requireNonNull(streamsBuilder, "StreamsBuilder [streamsBuilder] is required.");
+        this.streamsBuilder = Objects.requireNonNull(streamsBuilder, "StreamsBuilder [streamsBuilder] is required");
     }
 
     @Bean

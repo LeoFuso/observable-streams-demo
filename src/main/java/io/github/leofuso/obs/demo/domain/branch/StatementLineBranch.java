@@ -1,23 +1,23 @@
 package io.github.leofuso.obs.demo.domain.branch;
 
-import java.util.UUID;
-import java.util.function.Consumer;
+import java.util.*;
+import java.util.function.*;
 
-import org.apache.kafka.common.utils.Utils;
+import org.apache.kafka.common.utils.*;
+import org.apache.kafka.streams.kstream.Predicate;
 import org.apache.kafka.streams.kstream.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 
-import com.google.common.base.CaseFormat;
+import io.github.leofuso.obs.demo.events.*;
 
-import io.github.leofuso.obs.demo.events.StatementLine;
+import com.google.common.base.*;
 
 public interface StatementLineBranch {
 
     Logger logger = LoggerFactory.getLogger(StatementLineBranch.class);
 
-    static <S extends StatementLineBranch> S produce(Class<S> routerClass) {
-        return Utils.newInstance(routerClass);
+    static <S extends StatementLineBranch> S produce(Class<S> branchClass) {
+        return Utils.newInstance(branchClass);
     }
 
     static String namedRouter(StatementLineBranch branch) {
@@ -36,8 +36,7 @@ public interface StatementLineBranch {
         return kStream.peek((key, value) -> {
             final String message =
                     """
-                            Branching StatementLine [ {} ] to [ {} ].
-                            """;
+                            Branching StatementLine [{}] to [{}]""";
             logger.trace(message, key, topic());
         }, namedTrace);
     }
@@ -51,7 +50,7 @@ public interface StatementLineBranch {
         final Produced<UUID, StatementLine> produced = Produced.as(name() + "-produced");
         final Consumer<KStream<UUID, StatementLine>> kStreams = kStream -> trace(kStream).to(topic, produced);
 
-        final String branchedName = "-" + namedRouter(this) + "-branch";
+        final String branchedName = "-" + namedRouter(this);
         return Branched.withConsumer(kStreams, branchedName);
     }
 

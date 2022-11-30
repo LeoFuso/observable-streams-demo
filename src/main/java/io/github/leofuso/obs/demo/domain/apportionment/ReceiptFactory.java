@@ -1,6 +1,7 @@
 package io.github.leofuso.obs.demo.domain.apportionment;
 
 import java.math.*;
+import java.text.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
@@ -16,6 +17,8 @@ public class ReceiptFactory {
 
     private static ReceiptFactory INSTANCE;
     private final BaggageOrderExtractor baggageSolver;
+
+    private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.US);
 
     private ReceiptFactory() {
         baggageSolver = BaggageOrderExtractor.getInstance();
@@ -44,7 +47,7 @@ public class ReceiptFactory {
         final Map<String, ReceiptLine> lines = receipt.getLines();
         lines.merge(transaction + "", line, (original, repeated) -> {
             final String message = """
-                    Duplicated Receipt line [ {} ] ignored.
+                    Duplicated Receipt line [{}] ignored.
                     """;
             logger.warn(message, transaction);
             return original;
@@ -87,10 +90,9 @@ public class ReceiptFactory {
                 .peek(order -> {
                     final String message =
                             """
-                                    Found StatementLine apportionment [ {} ] of Order [ {} ] to be [ {} ].
-                                    """;
+                                    Found StatementLine apportionment [{}] of Order [{}] to be [{}]""";
 
-                    logger.info(message, object.getTransaction(), order, share);
+                    logger.debug(message, object.getTransaction(), order, currencyFormatter.format(share));
                 })
                 .collect(Collectors.toMap(Function.identity(), ignored -> receiptLine));
     }

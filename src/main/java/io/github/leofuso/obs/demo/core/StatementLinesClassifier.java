@@ -44,8 +44,7 @@ public class StatementLinesClassifier {
                 .filter((key, value) -> Objects.nonNull(key) || Objects.nonNull(value), namedFilter)
                 .peek((key, value) -> {
                     final String message = """
-                            Processing StatementLine [ {} ].
-                            """;
+                            Processing StatementLine [{}]""";
                     logger.info(message, key);
                 })
                 .processValues(replicateSupplier, namedReplica)

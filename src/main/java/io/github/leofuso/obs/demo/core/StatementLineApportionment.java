@@ -1,23 +1,19 @@
 package io.github.leofuso.obs.demo.core;
 
 
-import java.time.Duration;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 
-import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.StreamsBuilder;
+import org.springframework.context.annotation.*;
+
+import org.apache.kafka.common.utils.*;
+import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.WindowStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.apache.kafka.streams.state.*;
+import org.slf4j.*;
 
-import io.github.leofuso.obs.demo.domain.apportionment.ReceiptFactory;
-import io.github.leofuso.obs.demo.domain.apportionment.StatementLineApportionmentProcessorSupplier;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineApportionmentBranch;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
+import io.github.leofuso.obs.demo.domain.apportionment.*;
+import io.github.leofuso.obs.demo.domain.branch.*;
 import io.github.leofuso.obs.demo.events.*;
 
 @Configuration
@@ -55,8 +51,7 @@ public class StatementLineApportionment {
         return streamsBuilder.stream(topic, consumed)
                 .peek((key, value) -> {
                     final String message = """
-                            Processing apportionment for StatementLine [ {} ].
-                            """;
+                            Processing apportionment for StatementLine [{}]""";
                     logger.info(message, key);
                 })
                 .process(new StatementLineApportionmentProcessorSupplier(), namedApportionmentProcessor)
