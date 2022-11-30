@@ -1,0 +1,55 @@
+{
+  "order": "f1a4cfc3-b1a2-459d-ab0c-d7ac3cac42d0",
+  "deficit": 8.879,
+  "lines": {
+    "53a50a63-93ba-5ffd-b8cf-981a73947a7f": {
+      "transaction": "53a50a63-93ba-5ffd-b8cf-981a73947a7f",
+      "source": {
+        "namespace": "74074428-7c4d-4922-b8fd-7c32e9ae499b",
+        "domain": "obs.demo"
+      },
+      "account": "97175496-7cb2-468e-a812-015f7a44450f",
+      "details": {
+        "annotation": "Completed by the partner in less than 15 minutes.",
+        "department": "ROUTE"
+      },
+      "operation": "CREDIT",
+      "amount": 15.89,
+      "competence": "2022-11-29T02:40:19.698918151Z",
+      "baggage": {}
+    },
+    "264e46dc-cda5-5782-84cf-e069c05cb417": {
+      "transaction": "264e46dc-cda5-5782-84cf-e069c05cb417",
+      "source": {
+        "namespace": "c4c24057-8a53-49c0-867c-5c39074ab426",
+        "domain": "obs.demo"
+      },
+      "account": "97175496-7cb2-468e-a812-015f7a44450f",
+      "details": {
+        "annotation": "Route completed by the partner in less than 15 minutes.",
+        "department": "INCENTIVE"
+      },
+      "operation": "CREDIT",
+      "amount": 1.589,
+      "competence": "2022-11-29T02:40:19.698918151Z",
+      "baggage": {}
+    },
+    "90bedd55-2984-5956-9e1d-ec0a71397d6e": {
+      "transaction": "90bedd55-2984-5956-9e1d-ec0a71397d6e",
+      "source": {
+        "namespace": "45c1c492-b923-4db9-bb85-5dc600bc2c0e",
+        "domain": "obs.demo"
+      },
+      "account": "97175496-7cb2-468e-a812-015f7a44450f",
+      "details": {
+        "annotation": "First ROUTE of the day.",
+        "department": "INCENTIVE"
+      },
+      "operation": "CREDIT",
+      "amount": 2.00,
+      "competence": "2022-11-29T02:40:19.698918151Z",
+      "baggage": {}
+    }
+  },
+  "baggage": {}
+}

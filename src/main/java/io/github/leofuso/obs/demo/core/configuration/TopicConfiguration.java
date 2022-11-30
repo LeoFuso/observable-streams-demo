@@ -20,6 +20,10 @@ public class TopicConfiguration {
 
     public static final String STATEMENT_LINE_APPORTIONMENT_BRANCH = "obs.statement-line-apportionment-branch";
 
+    public static final String RECEIPT_CHANGELOG = "obs.internal-receipt-store-changelog";
+
+    public static final String RECEIPT_STORE = "receipt-store";
+
     public static final String TREASURE_HOUSE_ACCOUNTING_BRANCH = "obs.treasure-house-accouting-branch";
 
     /**

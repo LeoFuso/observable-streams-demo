@@ -52,7 +52,7 @@ public class StatementLineApportionment {
                 .peek((key, value) -> {
                     final String message = """
                             Processing apportionment for StatementLine [{}]""";
-                    logger.info(message, key);
+                    logger.debug(message, key);
                 })
                 .process(new StatementLineApportionmentProcessorSupplier(), namedApportionmentProcessor)
                 .groupByKey(namdGroup)

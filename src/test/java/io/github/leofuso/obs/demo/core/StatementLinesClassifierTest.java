@@ -14,6 +14,7 @@ import io.github.leofuso.obs.demo.events.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
 
+@DisplayName("StatementLinesClassfier core tests")
 class StatementLinesClassifierTest extends CoreTest {
 
     private TestInputTopic<UUID, StatementLine> source;
