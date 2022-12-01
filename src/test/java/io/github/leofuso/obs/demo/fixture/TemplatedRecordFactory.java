@@ -11,23 +11,23 @@ import org.apache.avro.specific.*;
 
 import tech.allegro.schema.json2avro.converter.*;
 
-public class SpecificRecordFixture {
+public class TemplatedRecordFactory {
 
     private final ResourceLoader loader;
     private final JsonAvroConverter converter;
 
-    public SpecificRecordFixture(ResourceLoader loader, JsonAvroConverter converter) {
+    private TemplatedRecordFactory(ResourceLoader loader, JsonAvroConverter converter) {
         this.loader = loader;
         this.converter = converter;
     }
 
-    public static SpecificRecordFixture fixture(ResourceLoader loader, JsonAvroConverter converter) {
+    public static TemplatedRecordFactory getInstance(ResourceLoader loader, JsonAvroConverter converter) {
         Objects.requireNonNull(loader, "ResourceLoader is required.");
         Objects.requireNonNull(converter, "JsonAvroConverter is required.");
-        return new SpecificRecordFixture(loader, converter);
+        return new TemplatedRecordFactory(loader, converter);
     }
 
-    public <T extends SpecificRecordBase & SpecificRecord> T loadRecord(final String location, final Class<T> tClass) {
+    public <T extends SpecificRecordBase & SpecificRecord> T make(final String location, final Class<T> tClass) {
         try {
             final Field schemaField = tClass.getDeclaredField("SCHEMA$");
             schemaField.setAccessible(true);

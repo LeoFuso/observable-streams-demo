@@ -1,24 +1,45 @@
 package io.github.leofuso.obs.demo.core;
 
 import java.util.*;
+import java.util.stream.*;
 
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.state.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.*;
 import org.junit.jupiter.params.*;
 import org.junit.jupiter.params.provider.*;
 
 import io.github.leofuso.obs.demo.core.configuration.*;
 import io.github.leofuso.obs.demo.events.*;
 import io.github.leofuso.obs.demo.fixture.*;
+import io.github.leofuso.obs.demo.fixture.annotation.*;
 
 @DisplayName("StatementLineApportionment core tests")
-@ExtendWith({ StatementLineParameterResolver.class, UUIDParameterResolver.class })
 class StatementLineApportionmentTest extends CoreTest {
 
     private TestInputTopic<UUID, StatementLine> source;
     private WindowStore<UUID, Receipt> store;
+
+    static Stream<Arguments> receipt(@RecordParameter("statement-line.template.json") StatementLine template) {
+
+        final String name = "obs.demo";
+        final UUID order = UUID.randomUUID();
+
+        return IntStream.range(0, 3)
+                .mapToObj(i -> {
+
+                    final UUID namespace = UUID.randomUUID();
+                    final UUID key = UUIDFixture.fromNamespaceAndBytes(namespace, name.getBytes());
+
+                    return StatementLine.newBuilder(template)
+                            .setTransaction(key)
+                            .setBaggage(Map.of(
+                                    "orders", "%s".formatted(order)
+                            ))
+                            .build();
+                })
+                .map(Arguments::arguments);
+    }
 
     @Override
     protected void contextSetup() {
@@ -34,14 +55,16 @@ class StatementLineApportionmentTest extends CoreTest {
                     """
     )
     @ParameterizedTest
-    @EnumSource(names = { "ROUTE", "INCENTIVE" })
-    void bbb3cb2a2c1743059a7df8beeff00bbd(final Department department, final UUID uuid, final StatementLine line) {
+    @MethodSource("receipt")
+    void bbb3cb2a2c1743059a7df8beeff00bbd(Iterable<StatementLine> lines) {
 
         /* Given */
-        final Receipt receipt = loadRecord("events/receipt/template.json", Receipt.class);
+        System.out.println(lines);
 
         /* When */
 
         /* Then */
     }
+
+
 }

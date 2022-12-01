@@ -1,7 +1,5 @@
 package io.github.leofuso.obs.demo.core;
 
-import java.io.*;
-import java.lang.reflect.*;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.*;
@@ -9,21 +7,19 @@ import org.springframework.boot.autoconfigure.kafka.*;
 import org.springframework.boot.test.context.*;
 import org.springframework.boot.test.mock.mockito.*;
 import org.springframework.context.annotation.*;
-import org.springframework.core.io.*;
 import org.springframework.kafka.config.*;
 import org.springframework.kafka.core.*;
 import org.springframework.test.context.*;
 
-import org.apache.avro.*;
 import org.apache.avro.specific.*;
 import org.apache.kafka.common.serialization.*;
 import org.apache.kafka.streams.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.*;
 
 import io.confluent.kafka.streams.serdes.avro.*;
 import io.github.leofuso.obs.demo.*;
-
-import tech.allegro.schema.json2avro.converter.*;
+import io.github.leofuso.obs.demo.fixture.*;
 
 @SpringBootTest(
         properties =
@@ -48,6 +44,7 @@ import tech.allegro.schema.json2avro.converter.*;
 )
 @ActiveProfiles("test")
 @Import(JsonAvroConverterTestConfiguration.class)
+@ExtendWith({ RecordParameterResolver.class })
 public abstract class CoreTest {
 
     protected TopologyTestDriver testDriver;
@@ -59,12 +56,6 @@ public abstract class CoreTest {
 
     @Autowired
     private KafkaProperties kafkaProperties;
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
-    @Autowired
-    private JsonAvroConverter jsonAvroConverter;
 
     @MockBean
     @SuppressWarnings("unused")
@@ -91,32 +82,6 @@ public abstract class CoreTest {
         if (testDriver != null) {
             testDriver.close();
         }
-    }
-
-    protected <T extends SpecificRecordBase & SpecificRecord> T loadRecord(final String location, final Class<T> tClass) {
-        try {
-            final Field schemaField = tClass.getDeclaredField("SCHEMA$");
-            schemaField.setAccessible(true);
-            final Schema schema = (Schema) schemaField.get(null);
-            return doLoadSpecializedRecord(location, tClass, schema);
-        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private <T extends SpecificRecordBase & SpecificRecord> T doLoadSpecializedRecord(
-            final String location,
-            final Class<T> tClass,
-            final Schema schema
-    )
-            throws IOException {
-
-        final byte[] stream = resourceLoader
-                .getResource(location)
-                .getInputStream()
-                .readAllBytes();
-
-        return jsonAvroConverter.convertToSpecificRecord(stream, tClass, schema);
     }
 
     public class TopicFixture {

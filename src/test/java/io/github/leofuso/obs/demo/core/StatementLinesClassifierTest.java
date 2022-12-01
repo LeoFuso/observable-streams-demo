@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.*;
 
 import io.github.leofuso.obs.demo.core.configuration.*;
 import io.github.leofuso.obs.demo.events.*;
+import io.github.leofuso.obs.demo.fixture.annotation.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumingThat;
@@ -35,22 +36,21 @@ class StatementLinesClassifierTest extends CoreTest {
                      then redirects only supported StatementLine
                     """
     )
+    @EnumSource
     @ParameterizedTest(name = "{index} - {0}")
-    @EnumSource(value = Department.class)
-    void b8aec7e506ce410bb646f517cf71784c(final Department department) {
+    void b8aec7e506ce410bb646f517cf71784c(Department department, @RecordParameter("statement-line.template.json") StatementLine statement) {
 
         /* Given */
+        final UUID key = statement.getTransaction();
+        final Details details = statement.getDetails();
+        details.setDepartment(department);
+
         final Set<Department> supportedDepartments = Set.of(Department.ROUTE, Department.INCENTIVE);
         final BooleanSupplier supportedDepartmentAssumption = () -> supportedDepartments.contains(department);
         final BooleanSupplier unsupportedDepartmentAssumption = () -> !supportedDepartments.contains(department);
 
-        final StatementLine statementLine = loadRecord("events/statement-line/template.json", StatementLine.class);
-        final UUID key = statementLine.getTransaction();
-        final Details details = statementLine.getDetails();
-        details.setDepartment(department);
-
         /* When */
-        source.pipeInput(key, statementLine);
+        source.pipeInput(key, statement);
 
         /* Then*/
         assumingThat(
@@ -73,18 +73,17 @@ class StatementLinesClassifierTest extends CoreTest {
                      then redirects only supported StatementLine
                     """
     )
+    @EnumSource
     @ParameterizedTest(name = "{index} - {0}")
-    @EnumSource(value = Department.class)
-    void a62661d6d9284b408647adac87aaea32(final Department department) {
+    void a62661d6d9284b408647adac87aaea32(Department department, @RecordParameter("statement-line.template.json") StatementLine statement) {
 
         /* Given */
-        final StatementLine statementLine = loadRecord("events/statement-line/template.json", StatementLine.class);
-        final UUID key = statementLine.getTransaction();
-        final Details details = statementLine.getDetails();
+        final UUID key = statement.getTransaction();
+        final Details details = statement.getDetails();
         details.setDepartment(department);
 
         /* When */
-        source.pipeInput(key, statementLine);
+        source.pipeInput(key, statement);
 
         /* Then*/
         final KeyValue<UUID, StatementLine> keyValue = treasureBranch.readKeyValue();
