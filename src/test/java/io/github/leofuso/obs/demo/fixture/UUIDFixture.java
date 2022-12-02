@@ -13,7 +13,7 @@ public class UUIDFixture {
     static {
         try {
             byteArrayConstructor = UUID.class.getDeclaredConstructor(byte[].class);
-            byteArrayConstructor.setAccessible(true);
+            byteArrayConstructor.setAccessible(true); // this does not work.
         } catch (NoSuchMethodException e) {
             throw new InternalError("Failed to access the private UUID constructor.", e);
         }
