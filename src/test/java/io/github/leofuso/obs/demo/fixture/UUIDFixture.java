@@ -13,12 +13,13 @@ public class UUIDFixture {
     static {
         try {
             byteArrayConstructor = UUID.class.getDeclaredConstructor(byte[].class);
-            byteArrayConstructor.setAccessible(true); // this does not work.
+            byteArrayConstructor.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new InternalError("Failed to access the private UUID constructor.", e);
         }
     }
 
+    @SuppressWarnings("PrimitiveArrayArgumentToVarargsMethod")
     public static UUID fromNamespaceAndBytes(@Nonnull UUID namespace, @Nonnull byte[] name) {
         Objects.requireNonNull(namespace, "Namespace is required.");
         Objects.requireNonNull(name, "The name is required.");
@@ -39,7 +40,7 @@ public class UUIDFixture {
         digest[8] |= 0x80;  /* set to IETF variant  */
 
         try {
-            return byteArrayConstructor.newInstance((Object) digest);
+            return byteArrayConstructor.newInstance(digest);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new InternalError("Unexpected error while calling private constructor.", e);
         }

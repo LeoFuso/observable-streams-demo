@@ -1,7 +1,7 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.0.0'
-	id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
+    id 'org.springframework.boot' version '3.0.0'
+    id 'io.spring.dependency-management' version '1.1.0'
 
     id 'com.github.davidmc24.gradle.plugin.avro' version '1.5.0'
     id 'com.github.imflog.kafka-schema-registry-gradle-plugin' version '1.8.0'
@@ -13,9 +13,9 @@ sourceCompatibility = JavaVersion.VERSION_19
 targetCompatibility = JavaVersion.VERSION_19
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
     implementation {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
@@ -23,7 +23,7 @@ configurations {
 
 repositories {
     mavenLocal()
-	mavenCentral()
+    mavenCentral()
     maven { url 'https://packages.confluent.io/maven/' }
     maven { url = 'https://jitpack.io' }
 }
@@ -46,14 +46,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	/* Kafka */
-	implementation 'org.springframework.kafka:spring-kafka'
-	implementation 'org.apache.kafka:kafka-streams'
+    /* Kafka */
+    implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.apache.kafka:kafka-streams'
     implementation 'io.confluent:kafka-streams-avro-serde:7.3.0'
 
 
     /* Observability */
-	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
     implementation 'com.lmax:disruptor:3.4.4'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
@@ -62,20 +62,25 @@ dependencies {
     /* Annotation Processors */
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-	/* Tests */
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.kafka:spring-kafka-test'
+    /* Tests */
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'tech.allegro.schema.json2avro:converter:0.2.15'
     testImplementation 'org.assertj:assertj-core:3.23.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks {
 
     generateAvroJava {
-        source("src/main/avro")
+        source 'src/main/avro'
     }
 
     test {
+
+        jvmArgs += [
+                '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+        ]
         useJUnitPlatform()
     }
 }

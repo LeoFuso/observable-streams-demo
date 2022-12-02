@@ -35,7 +35,7 @@ public class ReceiptFactory {
         return Receipt.newBuilder()
                 .setDeficit(BigDecimal.ZERO)
                 .setOrder(new UUID(0, 0))
-                .setLines(new HashMap<>())
+                .setLines(Map.of())
                 .build();
     }
 
@@ -44,7 +44,7 @@ public class ReceiptFactory {
         final UUID transaction = line.getObject()
                 .getTransaction();
 
-        final Map<String, ReceiptLine> lines = receipt.getLines();
+        final Map<String, ReceiptLine> lines = new HashMap<>(receipt.getLines());
         lines.merge(transaction + "", line, (original, repeated) -> {
             final String message = """
                     Duplicated Receipt line [{}] ignored.
@@ -59,9 +59,9 @@ public class ReceiptFactory {
 
         return Receipt.newBuilder()
                 .setOrder(key)
-                .setLines(lines)
+                .setLines(Map.copyOf(lines))
                 .setDeficit(aggregateDeficit)
-                .setBaggage(new HashMap<>())
+                .setBaggage(Map.of())
                 .build();
     }
 

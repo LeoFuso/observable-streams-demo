@@ -94,8 +94,8 @@
             "type": {
                 "type": "bytes",
                 "logicalType": "decimal",
-                "precision": 4,
-                "scale": 2
+                "precision": 15,
+                "scale": 3
             }
         },
         {
