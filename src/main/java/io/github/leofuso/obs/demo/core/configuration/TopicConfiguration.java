@@ -39,7 +39,10 @@ public class TopicConfiguration {
      */
     public static final String RECEIPT_CHANGELOG = "obs.internal-receipt-store-changelog";
 
-    public static final String TREASURE_HOUSE_ACCOUNTING_BRANCH = "obs.treasure-house-accouting-branch";
+    /**
+     * The topic holding all accounting events by Business Partner.
+     */
+    public static final String TREASURE_HOUSE_ACCOUNTING_BRANCH = "obs.treasure-house-accounting-branch";
 
     /**
      * All Kafka's Topics work with the same quantity of partitions. The five-partition amount was chosen arbitrarily.
