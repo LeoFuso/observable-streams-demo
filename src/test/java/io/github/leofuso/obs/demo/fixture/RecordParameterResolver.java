@@ -1,16 +1,14 @@
 package io.github.leofuso.obs.demo.fixture;
 
-import java.lang.reflect.*;
+import io.github.leofuso.obs.demo.fixture.annotation.RecordParameter;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.avro.specific.SpecificRecordBase;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
-import org.springframework.context.*;
-import org.springframework.test.context.junit.jupiter.*;
-
-import org.apache.avro.specific.*;
-import org.junit.jupiter.api.extension.*;
-
-import io.github.leofuso.obs.demo.fixture.annotation.*;
-
-import tech.allegro.schema.json2avro.converter.*;
+import java.lang.reflect.Parameter;
 
 public class RecordParameterResolver<T extends SpecificRecordBase & SpecificRecord> implements ParameterResolver {
 
@@ -23,22 +21,13 @@ public class RecordParameterResolver<T extends SpecificRecordBase & SpecificReco
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) {
-
-        final ApplicationContext context = SpringExtension.getApplicationContext(extensionContext);
-        final JsonAvroConverter converter = context.getBean(JsonAvroConverter.class);
-
         return parameterContext.findAnnotation(RecordParameter.class)
                 .map(RecordParameter::value)
                 .map(location -> {
-
                     final Parameter parameter = parameterContext.getParameter();
-
-                    @SuppressWarnings("unchecked")
-                    final Class<? extends T> targetClass = (Class<? extends T>) parameter.getType();
-
-                    final TemplatedRecordFactory fixture = TemplatedRecordFactory.getInstance(context, converter);
-                    return fixture.make(location, targetClass);
+                    return TemplatedRecordFactory.make(location, (Class<? extends T>) parameter.getType());
                 })
                 .orElse(null);
     }

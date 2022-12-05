@@ -1,143 +1,142 @@
 package io.github.leofuso.obs.demo.core;
 
-import java.math.*;
-import java.time.*;
-import java.util.*;
-import java.util.concurrent.atomic.*;
-import java.util.stream.*;
+import io.github.leofuso.obs.demo.core.configuration.TopicConfiguration;
+import io.github.leofuso.obs.demo.events.Receipt;
+import io.github.leofuso.obs.demo.events.StatementLine;
+import io.github.leofuso.obs.demo.fixture.StatementLineFixture;
+import io.github.leofuso.obs.demo.fixture.annotation.RecordParameter;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.TestInputTopic;
+import org.apache.kafka.streams.TestOutputTopic;
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.*;
-import org.assertj.core.api.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.*;
-import org.junit.jupiter.params.provider.*;
-
-import io.github.leofuso.obs.demo.core.configuration.*;
-import io.github.leofuso.obs.demo.events.*;
-import io.github.leofuso.obs.demo.fixture.*;
-import io.github.leofuso.obs.demo.fixture.annotation.*;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @DisplayName("StatementLineApportionment core tests")
 class StatementLineApportionmentTest extends CoreTest {
 
     private TestInputTopic<UUID, StatementLine> source;
-    private WindowStore<UUID, ValueAndTimestamp<Receipt>> store;
+    private TestOutputTopic<UUID, Receipt> output;
 
     static Stream<Arguments> receipt(@RecordParameter("statement-line.template.json") StatementLine template) {
 
-        final String name = "obs.demo";
-        final UUID order = UUID.randomUUID();
+        final UUID order_A = UUID.fromString("f1a4cfc3-b1a2-459d-ab0c-d7ac3cac42d0");
+        final UUID order_B = UUID.fromString("126cefe4-aab4-4bb6-9876-e245c834b0ac");
+        final UUID order_C = UUID.fromString("26712a78-ca93-4a9f-aa72-25d08adfff64");
+        final UUID order_D = UUID.fromString("4475ad68-5c74-40bb-ae82-c79dfab3f149");
+        final UUID order_E = UUID.fromString("e6cd74f0-3918-4e3d-9d81-1c05deccd263");
 
-        final long millis = System.currentTimeMillis();
-        final Random random = new Random(millis);
-
-        final AtomicInteger upperBound = new AtomicInteger(40000);
-        final List<StatementLine> lines = IntStream.range(0, 3)
-                .mapToObj(i -> {
-
-                    final UUID namespace = UUID.randomUUID();
-                    final UUID key = UUIDFixture.fromNamespaceAndBytes(namespace, name.getBytes());
-
-                    final int found = random.nextInt(upperBound.get());
-                    upperBound.addAndGet(-found);
-                    final BigDecimal amount = BigDecimal.valueOf(found, 3);
-                    return StatementLine.newBuilder(template)
-                            .setTransaction(key)
-                            .setAmount(amount)
-                            .setBaggage(
-                                    Map.of(
-                                            "orders", "%s%s".formatted(
-                                                    order,
-                                                    IntStream.range(0, i)
-                                                            .mapToObj(dividers -> UUID.randomUUID())
-                                                            .map(Object::toString)
-                                                            .collect(
-                                                                    Collectors.joining(", ", ", ", "")
-                                                            )
-                                            )
-                                    ))
-                            .build();
-                })
-                .toList();
-
-        return Stream.of(Arguments.of(lines));
+        return Stream.of(
+                arguments(
+                        named("A collection with 7 StatementLines",
+                                Stream.of(
+                                                StatementLineFixture.generate(
+                                                        template,
+                                                        BigDecimal.valueOf(35.579),
+                                                        new UUID[]{order_A, order_B},
+                                                        new UUID[]{order_C, order_D},
+                                                        new UUID[]{order_E}
+                                                ),
+                                                StatementLineFixture.generate(
+                                                        template,
+                                                        BigDecimal.valueOf(12.299),
+                                                        new UUID[]{order_C},
+                                                        new UUID[]{order_A},
+                                                        new UUID[]{order_B}
+                                                ), StatementLineFixture.generate(
+                                                        template,
+                                                        BigDecimal.valueOf(8.370),
+                                                        new UUID[]{order_A, order_E}
+                                                )
+                                        ).flatMap(s -> s)
+                                        .toList()
+                        ),
+                        named("A Map of Order-UpperBound", Map.of(
+                                order_A, BigDecimal.valueOf(35.579 + 12.299 + 8.370),
+                                order_B, BigDecimal.valueOf(35.579 + 12.299),
+                                order_C, BigDecimal.valueOf(35.579 + 12.299),
+                                order_D, BigDecimal.valueOf(35.579)
+                        )),
+                        named("Expected step", Duration.ofMinutes(1))
+                ),
+                arguments(
+                        named("A collection with 4 StatementLines", Stream.of(
+                                        StatementLineFixture.generate(
+                                                template,
+                                                BigDecimal.valueOf(10.500),
+                                                new UUID[]{order_A, order_E},
+                                                new UUID[]{order_C, order_D}
+                                        ),
+                                        StatementLineFixture.generate(
+                                                template,
+                                                BigDecimal.valueOf(15.299),
+                                                new UUID[]{order_E},
+                                                new UUID[]{order_C, order_D}
+                                        )
+                                ).flatMap(stream -> stream)
+                                .toList()),
+                        named("A Map of Order-Sums", Map.of(
+                                order_A, BigDecimal.valueOf(10.500),
+                                order_E, BigDecimal.valueOf(10.500 + 15.299)
+                        )),
+                        named("Expected step", Duration.ofMinutes(2))
+                )
+        );
     }
 
     @Override
     protected void contextSetup() {
         source = topicFixture.input(TopicConfiguration.STATEMENT_LINE_APPORTIONMENT_BRANCH);
-        store = testDriver.getTimestampedWindowStore(TopicConfiguration.RECEIPT_STORE);
+        output = topicFixture.output(TopicConfiguration.RECEIPT);
     }
 
     @DisplayName(
             """
-                     Given a StatementLine that may or may not be supported by StatementLineApportionment,
-                     when classifying,
-                     then redirects only supported StatementLine
+                     Given some StatementLines,
+                     when performing all apportionments,
+                     then build a Receipt
                     """
     )
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index} - {0}")
     @MethodSource("receipt")
-    void bbb3cb2a2c1743059a7df8beeff00bbd(Iterable<StatementLine> statementLines) {
+    void bbb3cb2a2c1743059a7df8beef00bbd(List<KeyValue<UUID, StatementLine>> keyValues, Map<UUID, BigDecimal> upperBound, Duration step) {
 
         /* Given */
-        final Instant startpoint = Instant.now();
-        final Duration step = Duration.ofMinutes(2);
+        final Instant start = Instant.parse("2022-12-05T01:18:00.693309073Z");
 
         /* When */
-        Instant punctuate = startpoint.plusSeconds(10);
-        for (final StatementLine statement : statementLines) {
-
-            final Clock fixedClock = Clock.fixed(punctuate, ZoneId.systemDefault());
-            final Instant timestamp = Instant.now(fixedClock);
-
-            source.pipeInput(statement.getTransaction(), statement, timestamp);
-            testDriver.advanceWallClockTime(step);
-
-            punctuate = punctuate.plus(step);
-        }
-
-        testDriver.advanceWallClockTime(step);
-        punctuate = punctuate.plus(step);
+        source.pipeKeyValueList(
+                keyValues,
+                start,
+                step
+        );
 
         /* Then */
-        final KeyValueIterator<Windowed<UUID>, ValueAndTimestamp<Receipt>> receipts = store.fetchAll(startpoint, punctuate);
-        final List<KeyValue<Windowed<UUID>, ValueAndTimestamp<Receipt>>> values = Stream
-                .iterate(
-                        receipts.next(),
-                        kv -> receipts.hasNext(),
-                        kv -> receipts.next()
-                )
-                .toList();
-
-
-        assertThat(receipts)
-                .asList()
-                .singleElement()
-                .asInstanceOf(InstanceOfAssertFactories.type(KeyValue.class))
-                .satisfies(kv -> {
-
-                    final Windowed<UUID> key = (Windowed<UUID>) kv.key;
-                    final Receipt value = (Receipt) kv.value;
-
-                    assertThat(value)
-                            .satisfies(receipt -> {
-
-                                assertThat(receipt)
-                                        .extracting(Receipt::getOrder)
-                                        .isEqualTo(key.key());
-
-                                assertThat(receipt)
-                                        .extracting(Receipt::getLines)
-                                        .asInstanceOf(InstanceOfAssertFactories.map(String.class, StatementLine.class))
-                                        .hasSize(3);
-                            });
-                });
+        final Map<UUID, Receipt> receipts = output.readKeyValuesToMap();
+        upperBound.forEach((uuid, deficit) ->
+                assertThat(receipts)
+                        .asInstanceOf(InstanceOfAssertFactories.map(UUID.class, Receipt.class))
+                        .hasEntrySatisfying(
+                                uuid,
+                                receipt -> assertThat(receipt)
+                                        .extracting(Receipt::getDeficit)
+                                        .asInstanceOf(InstanceOfAssertFactories.BIG_DECIMAL)
+                                        .isLessThanOrEqualTo(deficit)
+                        )
+        );
     }
-
-
 }

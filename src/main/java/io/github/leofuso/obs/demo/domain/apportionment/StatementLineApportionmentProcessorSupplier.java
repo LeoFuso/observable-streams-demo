@@ -1,19 +1,24 @@
 package io.github.leofuso.obs.demo.domain.apportionment;
 
-import java.util.UUID;
-
-import org.apache.kafka.streams.processor.api.Record;
-import org.apache.kafka.streams.processor.api.*;
-
 import io.github.leofuso.obs.demo.events.ReceiptLine;
 import io.github.leofuso.obs.demo.events.StatementLine;
+import org.apache.kafka.streams.processor.api.ContextualProcessor;
+import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorSupplier;
+import org.apache.kafka.streams.processor.api.Record;
+
+import java.util.UUID;
 
 public class StatementLineApportionmentProcessorSupplier implements ProcessorSupplier<UUID, StatementLine, UUID, ReceiptLine> {
 
     private final ReceiptFactory factory;
 
-    public StatementLineApportionmentProcessorSupplier() {
+    private StatementLineApportionmentProcessorSupplier() {
         this.factory = ReceiptFactory.getInstance();
+    }
+
+    public static StatementLineApportionmentProcessorSupplier newInstance() {
+        return new StatementLineApportionmentProcessorSupplier();
     }
 
     @Override

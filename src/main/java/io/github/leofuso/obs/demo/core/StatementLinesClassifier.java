@@ -1,16 +1,21 @@
 package io.github.leofuso.obs.demo.core;
 
-import java.util.*;
+import io.github.leofuso.obs.demo.core.configuration.TopicConfiguration;
+import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
+import io.github.leofuso.obs.demo.domain.branch.StatementLineReplicaProcessorSupplier;
+import io.github.leofuso.obs.demo.events.StatementLine;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import org.springframework.context.annotation.*;
-
-import org.apache.kafka.streams.*;
-import org.apache.kafka.streams.kstream.*;
-import org.slf4j.*;
-
-import io.github.leofuso.obs.demo.core.configuration.*;
-import io.github.leofuso.obs.demo.domain.branch.*;
-import io.github.leofuso.obs.demo.events.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Configuration
 public class StatementLinesClassifier {
@@ -32,7 +37,7 @@ public class StatementLinesClassifier {
         final String topic = TopicConfiguration.APPROVED_STATEMENT_LINE;
         final Consumed<UUID, StatementLine> consumed = Consumed.as(NAMED_SUFFIX + "-consumed");
         final Named namedFilter = Named.as(NAMED_SUFFIX + "-filter");
-        final Named namedBrancher = Named.as(NAMED_SUFFIX + "-brancher");
+        final Named namedBranched = Named.as(NAMED_SUFFIX + "-branched");
         final Named namedReplica = Named.as(NAMED_SUFFIX + "-replicated");
 
         final StatementLineReplicaProcessorSupplier replicateSupplier = StatementLineReplicaProcessorSupplier.replicate(
@@ -48,7 +53,7 @@ public class StatementLinesClassifier {
                     logger.info(message, key);
                 })
                 .processValues(replicateSupplier, namedReplica)
-                .split(namedBrancher)
+                .split(namedBranched)
                 .branch(statementLineApportionmentBranch.supports(), statementLineApportionmentBranch.branched())
                 .defaultBranch(treasureHouseAccountingBranch.branched());
     }

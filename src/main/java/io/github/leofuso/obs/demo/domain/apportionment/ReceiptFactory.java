@@ -1,15 +1,19 @@
 package io.github.leofuso.obs.demo.domain.apportionment;
 
-import java.math.*;
-import java.text.*;
+import io.github.leofuso.obs.demo.domain.apportionment.baggage.BaggageOrderExtractor;
+import io.github.leofuso.obs.demo.events.Ratio;
+import io.github.leofuso.obs.demo.events.Receipt;
+import io.github.leofuso.obs.demo.events.ReceiptLine;
+import io.github.leofuso.obs.demo.events.StatementLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
-
-import org.slf4j.*;
-
-import io.github.leofuso.obs.demo.domain.apportionment.baggage.*;
-import io.github.leofuso.obs.demo.events.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ReceiptFactory {
 
@@ -61,19 +65,22 @@ public class ReceiptFactory {
                 .setOrder(key)
                 .setLines(Map.copyOf(lines))
                 .setDeficit(aggregateDeficit)
-                .setBaggage(Map.of())
+                .setBaggage(Map.copyOf(receipt.getBaggage()))
                 .build();
     }
 
     public Map<UUID, ReceiptLine> performApportion(final StatementLine object) {
 
         final List<UUID> orders = baggageSolver.extract(object);
+        if (orders.isEmpty()) {
+            return Map.of();
+        }
 
         final BigDecimal amount = object.getAmount();
         final int denominator = orders.size();
 
         final BigDecimal divisor = BigDecimal.valueOf(denominator);
-        final BigDecimal share = amount.divide(divisor, RoundingMode.DOWN);
+        final BigDecimal share = amount.divide(divisor, RoundingMode.HALF_EVEN);
 
         final Ratio ratio = Ratio.newBuilder()
                 .setNumerator(1)

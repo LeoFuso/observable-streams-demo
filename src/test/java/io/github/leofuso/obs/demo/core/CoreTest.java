@@ -1,25 +1,26 @@
 package io.github.leofuso.obs.demo.core;
 
-import java.util.*;
-
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.boot.autoconfigure.kafka.*;
-import org.springframework.boot.test.context.*;
-import org.springframework.boot.test.mock.mockito.*;
-import org.springframework.context.annotation.*;
-import org.springframework.kafka.config.*;
-import org.springframework.kafka.core.*;
-import org.springframework.test.context.*;
-
-import org.apache.avro.specific.*;
-import org.apache.kafka.common.serialization.*;
+import io.confluent.kafka.streams.serdes.avro.ReflectionAvroDeserializer;
+import io.confluent.kafka.streams.serdes.avro.ReflectionAvroSerializer;
+import io.github.leofuso.obs.demo.fixture.RecordParameterResolver;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.kafka.common.serialization.UUIDDeserializer;
+import org.apache.kafka.common.serialization.UUIDSerializer;
 import org.apache.kafka.streams.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.kafka.config.KafkaStreamsConfiguration;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.test.context.ActiveProfiles;
 
-import io.confluent.kafka.streams.serdes.avro.*;
-import io.github.leofuso.obs.demo.*;
-import io.github.leofuso.obs.demo.fixture.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 @SpringBootTest(
         properties =
@@ -35,7 +36,8 @@ import io.github.leofuso.obs.demo.fixture.*;
                         "spring.kafka.properties.value.subject.name.strategy=io.confluent.kafka.serializers.subject.RecordNameStrategy",
 
                         "spring.kafka.streams.auto-startup=false",
-                        "spring.kafka.streams.application-id=obs.managment",
+                        "spring.kafka.streams.properties.state.dir=/tmp/kafka-streams/${random.uuid}",
+                        "spring.kafka.streams.application-id=obs.management",
                         "spring.kafka.streams.properties.default.key.serde=org.apache.kafka.common.serialization.Serdes$UUIDSerde",
                         "spring.kafka.streams.properties.default.value.serde=io.confluent.kafka.streams.serdes.avro.ReflectionAvroSerde"
                 }
@@ -43,8 +45,7 @@ import io.github.leofuso.obs.demo.fixture.*;
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
 @ActiveProfiles("test")
-@Import(JsonAvroConverterTestConfiguration.class)
-@ExtendWith({ RecordParameterResolver.class })
+@ExtendWith({RecordParameterResolver.class})
 public abstract class CoreTest {
 
     protected TopologyTestDriver testDriver;
@@ -110,3 +111,4 @@ public abstract class CoreTest {
 
     }
 }
+

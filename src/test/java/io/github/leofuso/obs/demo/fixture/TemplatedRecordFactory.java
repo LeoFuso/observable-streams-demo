@@ -1,33 +1,43 @@
 package io.github.leofuso.obs.demo.fixture;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
 
-import org.springframework.core.io.*;
+import jakarta.annotation.Nullable;
+import org.apache.avro.Schema;
+import org.apache.avro.specific.SpecificRecord;
+import org.apache.avro.specific.SpecificRecordBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import tech.allegro.schema.json2avro.converter.JsonAvroConverter;
 
-import org.apache.avro.*;
-import org.apache.avro.specific.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.Objects;
 
-import tech.allegro.schema.json2avro.converter.*;
-
+/**
+ * Static Factory for {@link SpecificRecord SpecificRecords} located within the classpath that can be initialized with default parameters
+ * also found within the current classpath.
+ */
 public class TemplatedRecordFactory {
 
-    private final ResourceLoader loader;
-    private final JsonAvroConverter converter;
+    private static final Logger logger = LoggerFactory.getLogger(TemplatedRecordFactory.class);
+    private static final JsonAvroConverter converter = new JsonAvroConverter();
 
-    private TemplatedRecordFactory(ResourceLoader loader, JsonAvroConverter converter) {
-        this.loader = loader;
-        this.converter = converter;
+    private TemplatedRecordFactory() { /* Noop */ }
+
+    public static <T extends SpecificRecordBase & SpecificRecord> T make(final String location, final Class<T> tClass) {
+        try {
+            Objects.requireNonNull(location, "Location is required.");
+            Objects.requireNonNull(tClass, "Class is required.");
+            return doMake(location, tClass);
+        } catch (RuntimeException ex) {
+            logger.error("Unexpected exception when making SpecificRecord: ", ex);
+            return null;
+        }
     }
 
-    public static TemplatedRecordFactory getInstance(ResourceLoader loader, JsonAvroConverter converter) {
-        Objects.requireNonNull(loader, "ResourceLoader is required.");
-        Objects.requireNonNull(converter, "JsonAvroConverter is required.");
-        return new TemplatedRecordFactory(loader, converter);
-    }
-
-    public <T extends SpecificRecordBase & SpecificRecord> T make(final String location, final Class<T> tClass) {
+    private static <T extends SpecificRecordBase & SpecificRecord> T doMake(final String location, final Class<T> tClass) {
         try {
             final Field schemaField = tClass.getDeclaredField("SCHEMA$");
             schemaField.setAccessible(true);
@@ -38,18 +48,25 @@ public class TemplatedRecordFactory {
         }
     }
 
-    private <T extends SpecificRecordBase & SpecificRecord> T doLoadSpecializedRecord(
+    @Nullable
+    private static <T extends SpecificRecordBase & SpecificRecord> T doLoadSpecializedRecord(
             final String location,
             final Class<T> tClass,
             final Schema schema
-    )
-            throws IOException {
+    ) throws IOException {
 
-        final byte[] stream = loader
-                .getResource(location)
-                .getInputStream()
-                .readAllBytes();
+        final URL resource = TemplatedRecordFactory.class
+                .getClassLoader()
+                .getResource(location);
 
-        return converter.convertToSpecificRecord(stream, tClass, schema);
+        if (resource == null) {
+            return null;
+        }
+
+        try (final InputStream inputStream = resource.openStream()) {
+            final byte[] stream = inputStream.readAllBytes();
+            return converter.convertToSpecificRecord(stream, tClass, schema);
+        }
+
     }
 }
