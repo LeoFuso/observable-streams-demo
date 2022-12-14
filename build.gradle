@@ -43,6 +43,9 @@ ext['brave.version'] = '5.14.1'
 
 dependencies {
 
+    /* Subject */
+    implementation 'io.github.leofuso.observable.streams:brave:1.0-SNAPSHOT'
+
     /* Spring */
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'

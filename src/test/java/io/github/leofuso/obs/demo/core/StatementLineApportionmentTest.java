@@ -1,30 +1,24 @@
 package io.github.leofuso.obs.demo.core;
 
-import io.github.leofuso.obs.demo.core.configuration.TopicConfiguration;
-import io.github.leofuso.obs.demo.events.Receipt;
-import io.github.leofuso.obs.demo.events.StatementLine;
-import io.github.leofuso.obs.demo.fixture.StatementLineFixture;
-import io.github.leofuso.obs.demo.fixture.annotation.RecordParameter;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TestOutputTopic;
-import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import java.math.*;
+import java.time.*;
+import java.util.*;
+import java.util.stream.*;
 
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
+import org.apache.kafka.streams.*;
+import org.assertj.core.api.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.*;
+import org.junit.jupiter.params.provider.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
+import io.github.leofuso.obs.demo.core.configuration.*;
+import io.github.leofuso.obs.demo.events.*;
+import io.github.leofuso.obs.demo.fixture.*;
+import io.github.leofuso.obs.demo.fixture.annotation.*;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Named.*;
+import static org.junit.jupiter.params.provider.Arguments.*;
 
 @DisplayName("StatementLineApportionment core tests")
 class StatementLineApportionmentTest extends CoreTest {
@@ -42,27 +36,29 @@ class StatementLineApportionmentTest extends CoreTest {
 
         return Stream.of(
                 arguments(
-                        named("A collection with 7 StatementLines",
+                        named(
+                                "A collection with 7 StatementLines",
                                 Stream.of(
                                                 StatementLineFixture.generate(
                                                         template,
                                                         BigDecimal.valueOf(35.579),
-                                                        new UUID[]{order_A, order_B},
-                                                        new UUID[]{order_C, order_D},
-                                                        new UUID[]{order_E}
+                                                        new UUID[] { order_A, order_B },
+                                                        new UUID[] { order_C, order_D },
+                                                        new UUID[] { order_E }
                                                 ),
                                                 StatementLineFixture.generate(
                                                         template,
                                                         BigDecimal.valueOf(12.299),
-                                                        new UUID[]{order_C},
-                                                        new UUID[]{order_A},
-                                                        new UUID[]{order_B}
+                                                        new UUID[] { order_C },
+                                                        new UUID[] { order_A },
+                                                        new UUID[] { order_B }
                                                 ), StatementLineFixture.generate(
                                                         template,
                                                         BigDecimal.valueOf(8.370),
-                                                        new UUID[]{order_A, order_E}
+                                                        new UUID[] { order_A, order_E }
                                                 )
-                                        ).flatMap(s -> s)
+                                        )
+                                        .flatMap(s -> s)
                                         .toList()
                         ),
                         named("A Map of Order-UpperBound", Map.of(
@@ -78,16 +74,17 @@ class StatementLineApportionmentTest extends CoreTest {
                                         StatementLineFixture.generate(
                                                 template,
                                                 BigDecimal.valueOf(10.500),
-                                                new UUID[]{order_A, order_E},
-                                                new UUID[]{order_C, order_D}
+                                                new UUID[] { order_A, order_E },
+                                                new UUID[] { order_C, order_D }
                                         ),
                                         StatementLineFixture.generate(
                                                 template,
                                                 BigDecimal.valueOf(15.299),
-                                                new UUID[]{order_E},
-                                                new UUID[]{order_C, order_D}
+                                                new UUID[] { order_E },
+                                                new UUID[] { order_C, order_D }
                                         )
-                                ).flatMap(stream -> stream)
+                                )
+                                .flatMap(stream -> stream)
                                 .toList()),
                         named("A Map of Order-Sums", Map.of(
                                 order_A, BigDecimal.valueOf(10.500),
@@ -100,7 +97,7 @@ class StatementLineApportionmentTest extends CoreTest {
 
     @Override
     protected void contextSetup() {
-        source = topicFixture.input(TopicConfiguration.STATEMENT_LINE_APPORTIONMENT_BRANCH);
+        source = topicFixture.input(TopicConfiguration.STATEMENT_LINE_APPORTIONMENT_RECEIPT_LINE_REPARTITION);
         output = topicFixture.output(TopicConfiguration.RECEIPT);
     }
 
@@ -128,15 +125,15 @@ class StatementLineApportionmentTest extends CoreTest {
         /* Then */
         final Map<UUID, Receipt> receipts = output.readKeyValuesToMap();
         upperBound.forEach((uuid, deficit) ->
-                assertThat(receipts)
-                        .asInstanceOf(InstanceOfAssertFactories.map(UUID.class, Receipt.class))
-                        .hasEntrySatisfying(
-                                uuid,
-                                receipt -> assertThat(receipt)
-                                        .extracting(Receipt::getDeficit)
-                                        .asInstanceOf(InstanceOfAssertFactories.BIG_DECIMAL)
-                                        .isLessThanOrEqualTo(deficit)
-                        )
+                                   assertThat(receipts)
+                                           .asInstanceOf(InstanceOfAssertFactories.map(UUID.class, Receipt.class))
+                                           .hasEntrySatisfying(
+                                                   uuid,
+                                                   receipt -> assertThat(receipt)
+                                                           .extracting(Receipt::getDeficit)
+                                                           .asInstanceOf(InstanceOfAssertFactories.BIG_DECIMAL)
+                                                           .isLessThanOrEqualTo(deficit)
+                                           )
         );
     }
 }

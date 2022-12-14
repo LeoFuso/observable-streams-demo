@@ -1,31 +1,27 @@
 package io.github.leofuso.obs.demo.domain.apportionment.baggage;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.regex.*;
+import java.util.stream.*;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.logging.log4j.util.*;
+import org.slf4j.*;
 
-import io.github.leofuso.obs.demo.events.StatementLine;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.leofuso.obs.demo.events.*;
 
 public class BaggageOrderExtractor {
 
     private static final Logger logger = LoggerFactory.getLogger(BaggageOrderExtractor.class);
 
-    private static BaggageOrderExtractor INTANCE;
+    private static BaggageOrderExtractor INSTANCE;
 
     private BaggageOrderExtractor() {}
 
     public static BaggageOrderExtractor getInstance() {
-        if (INTANCE == null) {
-            INTANCE = new BaggageOrderExtractor();
+        if (INSTANCE == null) {
+            INSTANCE = new BaggageOrderExtractor();
         }
-        return INTANCE;
+        return INSTANCE;
     }
 
     public List<UUID> extract(final StatementLine line) {
@@ -65,7 +61,7 @@ public class BaggageOrderExtractor {
                 final String group = matcher.group();
                 return UUID.fromString(group);
             } catch (IllegalStateException ex) {
-                logger.error("Critical error extracint Order ID: ", ex);
+                logger.error("Critical error extracting Order ID: ", ex);
                 return new UUID(0, 0);
             }
         }

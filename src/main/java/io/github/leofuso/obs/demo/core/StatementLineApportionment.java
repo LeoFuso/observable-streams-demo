@@ -1,30 +1,27 @@
 package io.github.leofuso.obs.demo.core;
 
 
-import io.github.leofuso.obs.demo.domain.apportionment.ReceiptFactory;
-import io.github.leofuso.obs.demo.domain.apportionment.StatementLineApportionmentProcessorSupplier;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineApportionmentBranch;
-import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
-import io.github.leofuso.obs.demo.events.Receipt;
-import io.github.leofuso.obs.demo.events.StatementLine;
-import jakarta.annotation.PostConstruct;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.*;
-import org.apache.kafka.streams.state.WindowStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.time.*;
+import java.util.*;
+import java.util.function.*;
 
-import java.time.Duration;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
+import org.springframework.context.annotation.*;
+
+import org.apache.kafka.common.serialization.*;
+import org.apache.kafka.common.utils.*;
+import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.*;
+import org.apache.kafka.streams.state.*;
+import org.slf4j.*;
+
+import io.github.leofuso.obs.demo.domain.apportionment.*;
+import io.github.leofuso.obs.demo.domain.branch.*;
+import io.github.leofuso.obs.demo.events.*;
+
+import jakarta.annotation.*;
 
 import static io.github.leofuso.obs.demo.core.configuration.TopicConfiguration.*;
-import static org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
+import static org.apache.kafka.streams.kstream.Suppressed.*;
 
 @Configuration
 public class StatementLineApportionment {
@@ -50,8 +47,11 @@ public class StatementLineApportionment {
     public void setup() {
 
         final Function<String, String> name = "stln-apportionment-%s"::formatted;
-        streamsBuilder.<UUID, StatementLine>stream(STATEMENT_LINE_APPORTIONMENT_BRANCH, Consumed.as(name.apply("consumer")))
-                .peek((key, value) -> {
+        streamsBuilder.<UUID, StatementLine>stream(
+                        STATEMENT_LINE_APPORTIONMENT_RECEIPT_LINE_REPARTITION,
+                        Consumed.as(name.apply("consumer")))
+                .peek(
+                        (key, value) -> {
                             final String message = """
                                     Processing apportionment for StatementLine [{}]""";
                             logger.debug(message, key);
@@ -74,9 +74,10 @@ public class StatementLineApportionment {
                 )
                 .suppress(
                         Suppressed.untilWindowCloses(
-                                BufferConfig.unbounded()
-                                        .withMaxRecords(15) /* arbitrarily large value */
-                        ).withName(name.apply("receipt-suppressor"))
+                                        BufferConfig.unbounded()
+                                                .withMaxRecords(15) /* arbitrarily large value */
+                                )
+                                .withName(name.apply("receipt-suppressor"))
                 )
                 .toStream(Named.as(name.apply("receipt-stream")))
                 .selectKey((key, value) -> key.key(), Named.as(name.apply("receipt-window-unwrap")))

@@ -74,7 +74,7 @@
             "default": {}
         },
         {
-            "doc": "A bagagge is a context-senstive Key-Value carrier of business-unrelated data.",
+            "doc": "Baggage is a context-sensitive Key-Value carrier of business-unrelated data.",
             "name": "baggage",
             "type": {
                 "type": "map",

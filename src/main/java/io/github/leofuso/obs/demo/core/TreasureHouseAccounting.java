@@ -1,22 +1,20 @@
 package io.github.leofuso.obs.demo.core;
 
-import io.github.leofuso.obs.demo.domain.branch.StatementLineBranch;
-import io.github.leofuso.obs.demo.domain.branch.TreasureHouseAccoutingBranch;
-import io.github.leofuso.obs.demo.events.StatementLine;
-import jakarta.annotation.PostConstruct;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.Named;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.util.*;
+import java.util.function.*;
 
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
+import org.springframework.context.annotation.*;
 
-import static io.github.leofuso.obs.demo.core.configuration.TopicConfiguration.TREASURE_HOUSE_ACCOUNTING_BRANCH;
+import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.kstream.*;
+import org.slf4j.*;
+
+import io.github.leofuso.obs.demo.domain.branch.*;
+import io.github.leofuso.obs.demo.events.*;
+
+import jakarta.annotation.*;
+
+import static io.github.leofuso.obs.demo.core.configuration.TopicConfiguration.*;
 
 @Configuration
 public class TreasureHouseAccounting {
@@ -30,8 +28,8 @@ public class TreasureHouseAccounting {
     }
 
     @Bean
-    public TreasureHouseAccoutingBranch treasureHouseAccountingBranch() {
-        return StatementLineBranch.produce(TreasureHouseAccoutingBranch.class);
+    public TreasureHouseAccountingBranch treasureHouseAccountingBranch() {
+        return StatementLineBranch.produce(TreasureHouseAccountingBranch.class);
     }
 
     @PostConstruct
@@ -39,7 +37,8 @@ public class TreasureHouseAccounting {
 
         final Function<String, String> name = "stln-accounting-%s"::formatted;
         streamsBuilder.<UUID, StatementLine>stream(TREASURE_HOUSE_ACCOUNTING_BRANCH, Consumed.as(name.apply("consumer")))
-                .peek((key, value) -> {
+                .peek(
+                        (key, value) -> {
                             final String message = """
                                     Processing accounting for StatementLine [{}]""";
                             logger.debug(message, key);

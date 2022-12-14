@@ -11,7 +11,7 @@ import io.github.leofuso.obs.demo.fixture.*;
 
 
 /**
- * An annotation aimed to pass metadata needed to the {@link RecordParameterResolver SpecificRecordParameterResolver} be cabable of
+ * An annotation aimed to pass metadata needed to the {@link RecordParameterResolver SpecificRecordParameterResolver} be capable of
  * instantiating a {@link SpecificRecord SpecificRecord}
  */
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.PARAMETER })

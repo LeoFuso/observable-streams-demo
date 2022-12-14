@@ -12,10 +12,10 @@ import io.github.leofuso.obs.demo.core.configuration.*;
 import io.github.leofuso.obs.demo.events.*;
 import io.github.leofuso.obs.demo.fixture.annotation.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumingThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.*;
 
-@DisplayName("StatementLinesClassfier core tests")
+@DisplayName("StatementLinesClassifier core tests")
 class StatementLinesClassifierTest extends CoreTest {
 
     private TestInputTopic<UUID, StatementLine> source;
@@ -25,7 +25,7 @@ class StatementLinesClassifierTest extends CoreTest {
     @Override
     protected void contextSetup() {
         source = topicFixture.input(TopicConfiguration.APPROVED_STATEMENT_LINE);
-        apportionmentBranch = topicFixture.output(TopicConfiguration.STATEMENT_LINE_APPORTIONMENT_BRANCH);
+        apportionmentBranch = topicFixture.output(TopicConfiguration.STATEMENT_LINE_APPORTIONMENT_RECEIPT_LINE_REPARTITION);
         treasureBranch = topicFixture.output(TopicConfiguration.TREASURE_HOUSE_ACCOUNTING_BRANCH);
     }
 
@@ -68,7 +68,7 @@ class StatementLinesClassifierTest extends CoreTest {
 
     @DisplayName(
             """
-                     Given a StatementLine that may or may not be supported by TreasureHouseAccouting,
+                     Given a StatementLine that may or may not be supported by TreasureHouseAccounting,
                      when classifying,
                      then redirects only supported StatementLine
                     """

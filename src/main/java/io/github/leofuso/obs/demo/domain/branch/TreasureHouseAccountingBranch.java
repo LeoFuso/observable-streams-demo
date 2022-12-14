@@ -6,13 +6,13 @@ import org.apache.kafka.streams.kstream.*;
 
 import io.github.leofuso.obs.demo.events.*;
 
-import static io.github.leofuso.obs.demo.domain.branch.StatementLineReplicaProcessorSupplier.REPLICA_ID_KEY;
+import static io.github.leofuso.obs.demo.domain.branch.StatementLineReplicaProcessorSupplier.*;
 
-public class TreasureHouseAccoutingBranch implements StatementLineBranch {
+public class TreasureHouseAccountingBranch implements StatementLineBranch {
 
     private final String cachedName;
 
-    public TreasureHouseAccoutingBranch() {
+    public TreasureHouseAccountingBranch() {
         cachedName = StatementLineBranch.super.name();
     }
 

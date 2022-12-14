@@ -5,7 +5,7 @@
     "name": "StatementLine",
     "fields": [
         {
-            "doc": "UUID v5 compliant identification for the transaction. Used as the primary key — composed with the source field constituints.",
+            "doc": "UUID v5 compliant identification for the transaction. Used as the primary key — composed with the source field constituents.",
             "name": "transaction",
             "type": {
                 "type": "string",
@@ -53,7 +53,7 @@
                         "type": "string"
                     },
                     {
-                        "doc": "Autiable party responsible for this transaction.",
+                        "doc": "Auditable party responsible for this transaction.",
                         "name": "department",
                         "type": {
                             "type": "enum",
@@ -89,7 +89,7 @@
             }
         },
         {
-            "doc": "The amount transferred in the refered transaction. It can be zero or negative.",
+            "doc": "The amount transferred in the referred transaction. It can be zero or negative.",
             "name": "amount",
             "type": {
                 "type": "bytes",
@@ -99,7 +99,7 @@
             }
         },
         {
-            "doc": "Competence timestamp of the refered transaction. Always behind the System timestamp.",
+            "doc": "Competence timestamp of the referred transaction. Always behind the System timestamp.",
             "name": "competence",
             "type": {
                 "type": "long",
@@ -108,7 +108,7 @@
             "default": 0
         },
         {
-            "doc": "A bagagge is a context-senstive Key-Value carrier of business-unrelated data.",
+            "doc": "Baggage is a context-sensitive Key-Value carrier of business-unrelated data.",
             "name": "baggage",
             "type": {
                 "type": "map",
